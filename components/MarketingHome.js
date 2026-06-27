@@ -427,7 +427,7 @@ export default function MarketingHome() {
           desc="Calendario completo por estaciones, citas del día y notificaciones. Ideal en computadora o tablet."
           items={[
             "Vista por estaciones con disponibilidad en tiempo real",
-            "Cancela citas y bloquea horarios en un clic",
+            "Cancela citas y bloquea horarios en un click",
             "Inicio con citas del día y avisos internos",
             "Multi-negocio: cambia de local sin salir de la plataforma",
           ]}
