@@ -37,63 +37,91 @@ export default function LandingNav() {
   }, [open]);
 
   return (
-    <header className="landing-header">
-      <div className="landing-container landing-header-row">
-        <Link href="/" className="landing-brand" onClick={() => setOpen(false)}>
-          <span className="landing-brand-mark">
-            <Calendar className="h-5 w-5" />
-          </span>
-          <span>
-            <span className="block text-sm font-semibold text-gray-900">AgendaNet</span>
-            <span className="block text-xs text-gray-500">Multi-negocio</span>
-          </span>
-        </Link>
-
-        <nav className="landing-nav-desktop" aria-label="Principal">
-          {LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="landing-nav-link">
-              {l.label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="landing-nav-desktop landing-nav-cta">
-          <Link href="/platform/login" className="landing-btn-ghost">
-            Iniciar sesión
+    <>
+      <header className="landing-header">
+        <div className="landing-container landing-header-row">
+          <Link href="/" className="landing-brand" onClick={() => setOpen(false)}>
+            <span className="landing-brand-mark">
+              <Calendar className="h-5 w-5" />
+            </span>
+            <span>
+              <span className="block text-sm font-semibold text-gray-900">AgendaNet</span>
+              <span className="block text-xs text-gray-500">Multi-negocio</span>
+            </span>
           </Link>
-          <Link href="#precios" className="landing-btn-primary">
-            Ver planes
-          </Link>
+
+          <nav className="landing-nav-desktop" aria-label="Principal">
+            {LINKS.map((l) => (
+              <a key={l.href} href={l.href} className="landing-nav-link">
+                {l.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="landing-nav-desktop landing-nav-cta">
+            <Link href="/platform/login" className="landing-btn-ghost">
+              Iniciar sesión
+            </Link>
+            <Link href="#precios" className="landing-btn-primary">
+              Ver planes
+            </Link>
+          </div>
+
+          <button
+            type="button"
+            className="landing-menu-btn"
+            aria-expanded={open}
+            aria-controls="landing-menu"
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
-
-        <button
-          type="button"
-          className="landing-menu-btn"
-          aria-expanded={open}
-          aria-controls="landing-menu"
-          aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
+      </header>
 
       <div
         id="landing-menu"
         className={`landing-menu ${open ? "landing-menu--open" : ""}`}
         aria-hidden={!open}
       >
-        <button type="button" className="landing-menu-backdrop" onClick={() => setOpen(false)} aria-label="Cerrar" />
+        <button
+          type="button"
+          className="landing-menu-backdrop"
+          onClick={() => setOpen(false)}
+          aria-label="Cerrar menú"
+          tabIndex={open ? 0 : -1}
+        />
         <div className="landing-menu-panel" role="dialog" aria-modal="true" aria-label="Menú">
+          <div className="landing-menu-panel-header">
+            <p className="text-sm font-semibold text-gray-900">Menú</p>
+            <button
+              type="button"
+              className="landing-menu-close"
+              onClick={() => setOpen(false)}
+              aria-label="Cerrar menú"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
           <nav className="flex flex-col gap-1">
             {LINKS.map((l) => (
-              <a key={l.href} href={l.href} className="landing-menu-link" onClick={() => setOpen(false)}>
+              <a
+                key={l.href}
+                href={l.href}
+                className="landing-menu-link"
+                onClick={() => setOpen(false)}
+              >
                 {l.label}
               </a>
             ))}
           </nav>
-          <div className="mt-auto grid gap-2 border-t border-gray-100 pt-4">
-            <Link href="/platform/login" className="landing-btn-secondary w-full" onClick={() => setOpen(false)}>
+          <div className="mt-auto grid gap-2 border-t border-gray-200 pt-4">
+            <Link
+              href="/platform/login"
+              className="landing-btn-secondary w-full"
+              onClick={() => setOpen(false)}
+            >
               Iniciar sesión
             </Link>
             <Link href="#precios" className="landing-btn-primary w-full" onClick={() => setOpen(false)}>
@@ -102,6 +130,6 @@ export default function LandingNav() {
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 }
