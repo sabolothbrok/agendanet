@@ -50,6 +50,11 @@ export default async function AdminHomePage({ params }) {
                   <p className="text-gray-500">
                     {apt.space_name} · {apt.customer_phone}
                   </p>
+                  {apt.services?.length > 0 && (
+                    <p className="mt-0.5 text-gray-500 break-words">
+                      {apt.services.map((s) => s.name).join(", ")}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>

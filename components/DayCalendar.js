@@ -77,6 +77,9 @@ function SlotCell({
         <p className="text-gray-500">
           {formatTime(apt.start_at)} – {formatTime(apt.end_at)}
         </p>
+        {mode === "admin" && apt.services?.length > 0 && (
+          <p className="text-gray-500 break-words">{apt.services.map((s) => s.name).join(", ")}</p>
+        )}
         {mode === "admin" && onCancelAppointment && (
           <button
             type="button"
