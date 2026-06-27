@@ -217,7 +217,7 @@ function PhonePreview() {
             </div>
 
             <div className="landing-phone-slot-card card">
-              <p className="landing-phone-slot-time">10:00 a. m.</p>
+              <p className="landing-phone-slot-time">10:00 am</p>
               <div className="landing-phone-slot-grid">
                 <div className="landing-phone-slot-item">
                   <p className="landing-phone-station">Estación 1</p>
@@ -231,7 +231,7 @@ function PhonePreview() {
             </div>
 
             <div className="landing-phone-slot-card card">
-              <p className="landing-phone-slot-time">10:30 a. m.</p>
+              <p className="landing-phone-slot-time">10:30 am</p>
               <div className="landing-phone-slot-grid">
                 <div className="landing-phone-slot-item">
                   <p className="landing-phone-station">Estación 1</p>
@@ -264,7 +264,7 @@ function PhonePreview() {
               <div className="landing-phone-summary">
                 <p className="landing-phone-summary-title">Resumen</p>
                 <p className="landing-phone-summary-line">martes, 24 de junio de 2026</p>
-                <p className="landing-phone-summary-line">10:00 a. m. – 11:00 a. m. (60 min)</p>
+                <p className="landing-phone-summary-line">10:00 am – 11:00 am (60 min)</p>
               </div>
 
               <span className="btn btn-primary landing-phone-cta" aria-hidden="true">
