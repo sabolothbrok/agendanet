@@ -80,16 +80,19 @@ export default function UniversalLoginForm({
         </p>
       </header>
 
-      {loggedOut && !activeSession && (
-        <p
-          className={`auth-notice ${expired ? "auth-notice-warn" : ""}`}
-          role="status"
-        >
-          {expired
-            ? "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
-            : "Sesión cerrada correctamente."}
-        </p>
-      )}
+      {!activeSession &&
+        (error ? (
+          <p className="auth-error" role="alert">{error}</p>
+        ) : loggedOut && !isPending ? (
+          <p
+            className={`auth-notice ${expired ? "auth-notice-warn" : ""}`}
+            role="status"
+          >
+            {expired
+              ? "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
+              : "Sesión cerrada correctamente."}
+          </p>
+        ) : null)}
 
       {activeSession ? (
         <LoginSessionResume
@@ -101,12 +104,7 @@ export default function UniversalLoginForm({
           logoutHref={logoutHref}
         />
       ) : (
-        <>
-          {error && (
-            <p className="auth-error" role="alert">{error}</p>
-          )}
-
-          <form key={formKey} onSubmit={handleSubmit} className="auth-form">
+        <form key={formKey} onSubmit={handleSubmit} className="auth-form">
             <div>
               <label htmlFor="login-phone" className="auth-label">Teléfono</label>
               <div className="auth-input-wrap">
@@ -171,7 +169,6 @@ export default function UniversalLoginForm({
               {isPending ? "Entrando..." : destinations ? "Continuar" : "Entrar"}
             </button>
           </form>
-        </>
       )}
 
       <LoginFooter />
