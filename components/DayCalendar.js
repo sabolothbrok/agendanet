@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   addMinutes,
   combineDateAndTime,
@@ -167,6 +168,7 @@ export default function DayCalendar({
     () => generateTimeSlots(openStr, closeStr, business.slot_minutes || 30),
     [openStr, closeStr, business.slot_minutes]
   );
+  const isDesktop = useMediaQuery("(min-width: 768px)", false);
 
   if (!spaces.length) {
     return (
@@ -179,19 +181,23 @@ export default function DayCalendar({
 
   return (
     <div className="max-w-full min-w-0 space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        <label className="text-sm font-medium text-gray-700">Fecha</label>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <label htmlFor="calendar-date" className="text-sm font-medium text-gray-700">
+          Fecha
+        </label>
         <input
+          id="calendar-date"
           type="date"
           value={date}
           min={todayDateInputStr()}
           onChange={(e) => onDateChange(e.target.value)}
-          className="input min-w-0 max-w-full sm:max-w-xs"
+          className="input input-date"
         />
       </div>
 
-      {/* Mobile: cards por hora */}
-      <div className="space-y-3 md:hidden">
+      {/* Mobile: cards por hora (no renderizar tabla ancha en el DOM) */}
+      {!isDesktop && (
+      <div className="space-y-3">
         {slots.map((time) => (
           <div key={time} className="card p-3">
             <p className="mb-3 text-sm font-semibold text-gray-800">
@@ -238,9 +244,11 @@ export default function DayCalendar({
           </div>
         ))}
       </div>
+      )}
 
       {/* Desktop: tabla con scroll horizontal */}
-      <div className="day-calendar-desktop scroll-table hidden max-w-full rounded-lg border border-gray-200 bg-white md:block">
+      {isDesktop && (
+      <div className="scroll-table max-w-full rounded-lg border border-gray-200 bg-white">
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
@@ -298,6 +306,7 @@ export default function DayCalendar({
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

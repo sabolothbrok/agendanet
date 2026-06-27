@@ -1,8 +1,10 @@
+import ScrollReset from "@/components/ScrollReset";
 import AdminNav from "@/components/AdminNav";
 
 export default function AdminShell({ slug, businessName, current, isPlatformAdmin, children }) {
   return (
-    <div className="app-shell min-h-screen w-full min-w-0 overflow-x-hidden bg-gray-50 md:flex">
+    <div className="app-shell min-h-screen w-full max-w-full min-w-0 overflow-x-hidden bg-gray-50 md:flex">
+      <ScrollReset />
       <AdminNav
         slug={slug}
         businessName={businessName}

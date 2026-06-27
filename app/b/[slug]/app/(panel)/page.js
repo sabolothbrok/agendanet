@@ -26,7 +26,7 @@ export default async function ClientHomePage({ params, searchParams }) {
   );
 
   return (
-    <>
+    <div className="min-w-0 max-w-full">
       <Suspense fallback={null}>
         <BookedToast />
       </Suspense>
@@ -34,7 +34,7 @@ export default async function ClientHomePage({ params, searchParams }) {
       <p className="mt-1 text-sm text-gray-600 sm:text-base">
         Elige un espacio disponible en el calendario
       </p>
-      <div className="mt-4 sm:mt-6">
+      <div className="mt-4 min-w-0 sm:mt-6">
         <BookingClient
           slug={slug}
           business={business}
@@ -44,6 +44,6 @@ export default async function ClientHomePage({ params, searchParams }) {
           customerId={customer.id}
         />
       </div>
-    </>
+    </div>
   );
 }

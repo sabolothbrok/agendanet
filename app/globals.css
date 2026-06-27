@@ -16,6 +16,7 @@
 }
 
 html {
+  width: 100%;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -102,6 +103,19 @@ body {
   outline: none;
   border-color: #9ca3af;
   box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.2);
+}
+
+@media (max-width: 767px) {
+  .input {
+    font-size: 1rem;
+  }
+}
+
+.input-date {
+  width: auto;
+  min-width: 9.5rem;
+  max-width: 11rem;
+  flex-shrink: 0;
 }
 
 .badge {
@@ -530,9 +544,11 @@ body {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding-inline: 1rem;
+  padding-inline: max(1rem, env(safe-area-inset-left, 0px))
+    max(1rem, env(safe-area-inset-right, 0px));
   padding-top: 1rem;
   padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden;
 }
 
 @media (min-width: 640px) {
@@ -563,12 +579,6 @@ body {
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-@media (max-width: 767px) {
-  .day-calendar-desktop {
-    display: none !important;
-  }
 }
 
 .table-scroll {

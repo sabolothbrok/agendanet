@@ -1,13 +1,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import ScrollReset from "@/components/ScrollReset";
 import ClientNav from "@/components/ClientNav";
 
 export default function ClientShell({ slug, businessName, customer, children, mainClassName }) {
   const pathname = usePathname();
 
   return (
-    <div className="app-shell min-h-screen overflow-x-hidden bg-gray-50">
+    <div className="app-shell min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50">
+      <ScrollReset />
       <ClientNav
         slug={slug}
         businessName={businessName}
