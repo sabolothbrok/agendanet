@@ -10,6 +10,7 @@ import {
 import { formatPhone, formatTime } from "@/lib/utils";
 import { INVITE_TTL_MINUTES } from "@/lib/constants";
 import { useConfirm } from "@/hooks/useConfirm";
+import { useToast } from "@/hooks/useToast";
 
 async function copyToClipboard(text) {
   if (navigator.clipboard?.writeText) {
@@ -34,12 +35,14 @@ export default function CustomersClient({ slug, customers: initial }) {
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { confirm, dialog } = useConfirm();
+  const toast = useToast();
 
   async function handleCopy() {
     if (!inviteLink) return;
     try {
       await copyToClipboard(inviteLink);
       setCopied(true);
+      toast.success("Enlace copiado.");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
@@ -49,6 +52,10 @@ export default function CustomersClient({ slug, customers: initial }) {
   function generateLink() {
     startTransition(async () => {
       const res = await adminGenerateInvite(slug);
+      if (res.error) {
+        toast.error(res.error);
+        return;
+      }
       if (res.link) {
         setInviteLink(res.link);
         setInviteExpiresAt(res.expiresAt || null);
@@ -56,9 +63,10 @@ export default function CustomersClient({ slug, customers: initial }) {
         try {
           await copyToClipboard(res.link);
           setCopied(true);
+          toast.success("Enlace generado y copiado.");
           setTimeout(() => setCopied(false), 2000);
         } catch {
-          // El enlace queda visible; el usuario puede usar el botón Copiar.
+          toast.success("Enlace generado.");
         }
       }
     });
@@ -72,15 +80,25 @@ export default function CustomersClient({ slug, customers: initial }) {
       cancelLabel: "Volver",
     });
     if (!ok) return;
-    await adminDeleteCustomer(slug, id);
+    const res = await adminDeleteCustomer(slug, id);
+    if (res?.error) {
+      toast.error(res.error);
+      return;
+    }
     setCustomers((c) => c.filter((x) => x.id !== id));
+    toast.success("Cliente eliminado.");
   }
 
   async function togglePremium(id, current) {
-    await adminTogglePremium(slug, id, !current);
+    const res = await adminTogglePremium(slug, id, !current);
+    if (res?.error) {
+      toast.error(res.error);
+      return;
+    }
     setCustomers((c) =>
       c.map((x) => (x.id === id ? { ...x, is_premium: !current } : x))
     );
+    toast.success(!current ? "Cliente marcado como premium." : "Cliente marcado como estándar.");
   }
 
   return (

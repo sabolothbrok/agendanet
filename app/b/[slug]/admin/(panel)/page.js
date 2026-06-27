@@ -1,8 +1,8 @@
 import AdminShell from "@/components/AdminShell";
+import MarkNotificationButton from "@/components/MarkNotificationButton";
 import { getSession } from "@/lib/session";
 import { requireAdminSession } from "@/lib/auth";
 import { getTodayAppointments, listNotifications } from "@/lib/queries";
-import { adminMarkRead } from "@/app/actions/admin";
 import { formatTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -77,12 +77,9 @@ export default async function AdminHomePage({ params }) {
                   <p className="font-medium text-gray-900">{n.title}</p>
                   <p className="text-gray-600">{n.body}</p>
                   {!n.read_at && (
-                    <form action={adminMarkRead.bind(null, slug)} className="mt-2">
-                      <input type="hidden" name="notificationId" value={n.id} />
-                      <button type="submit" className="text-xs text-gray-500 hover:underline">
-                        Marcar leída
-                      </button>
-                    </form>
+                    <div className="mt-2">
+                      <MarkNotificationButton slug={slug} notificationId={n.id} />
+                    </div>
                   )}
                 </li>
               ))}

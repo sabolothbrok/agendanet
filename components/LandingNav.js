@@ -8,7 +8,6 @@ const LINKS = [
   { href: "#funciones", label: "Funciones" },
   { href: "#como-funciona", label: "Cómo funciona" },
   { href: "#precios", label: "Precios" },
-  { href: "#demo", label: "Demo" },
 ];
 
 export default function LandingNav() {
@@ -44,10 +43,7 @@ export default function LandingNav() {
             <span className="landing-brand-mark">
               <Calendar className="h-5 w-5" />
             </span>
-            <span>
-              <span className="block text-sm font-semibold text-gray-900">AgendaNet</span>
-              <span className="block text-xs text-gray-500">Multi-negocio</span>
-            </span>
+            <span className="landing-brand-name">AgendaNet</span>
           </Link>
 
           <nav className="landing-nav-desktop" aria-label="Principal">
@@ -59,7 +55,7 @@ export default function LandingNav() {
           </nav>
 
           <div className="landing-nav-desktop landing-nav-cta">
-            <Link href="/platform/login" className="landing-btn-ghost">
+            <Link href="/login" className="landing-btn-ghost">
               Iniciar sesión
             </Link>
             <Link href="#precios" className="landing-btn-primary">
@@ -116,12 +112,8 @@ export default function LandingNav() {
               </a>
             ))}
           </nav>
-          <div className="mt-auto grid gap-2 border-t border-gray-200 pt-4">
-            <Link
-              href="/platform/login"
-              className="landing-btn-secondary w-full"
-              onClick={() => setOpen(false)}
-            >
+          <div className="mt-auto border-t border-gray-200 pt-4 flex flex-col gap-2">
+            <Link href="/login" className="landing-btn-secondary w-full" onClick={() => setOpen(false)}>
               Iniciar sesión
             </Link>
             <Link href="#precios" className="landing-btn-primary w-full" onClick={() => setOpen(false)}>

@@ -4,12 +4,13 @@ import { useState, useTransition } from "react";
 import { customerCancel } from "@/app/actions/customer";
 import { formatDateShort, formatTime, getAppointmentStatusLabel } from "@/lib/utils";
 import { useConfirm } from "@/hooks/useConfirm";
+import { useToast } from "@/hooks/useToast";
 
 export default function ReservationsClient({ slug, appointments, business }) {
   const [items, setItems] = useState(appointments);
-  const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const { confirm, dialog } = useConfirm();
+  const toast = useToast();
 
   const now = new Date();
   const active = items.filter(
@@ -27,11 +28,10 @@ export default function ReservationsClient({ slug, appointments, business }) {
       cancelLabel: "Volver",
     });
     if (!ok) return;
-    setError("");
     startTransition(async () => {
       const res = await customerCancel(slug, id);
       if (res?.error) {
-        setError(res.error);
+        toast.error(res.error);
         return;
       }
       setItems((prev) =>
@@ -39,6 +39,7 @@ export default function ReservationsClient({ slug, appointments, business }) {
           a.id === id ? { ...a, status: "cancelled", cancelled_by: "customer" } : a
         )
       );
+      toast.success("Reserva cancelada.");
     });
   }
 
@@ -82,7 +83,6 @@ export default function ReservationsClient({ slug, appointments, business }) {
   return (
     <div className={`space-y-8 ${isPending ? "opacity-60" : ""}`}>
       {dialog}
-      {error && <p className="text-sm text-red-600">{error}</p>}
       <section>
         <h2 className="font-semibold text-gray-900">Activas</h2>
         {active.length === 0 ? (

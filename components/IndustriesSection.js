@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useState } from "react";
 import {
-  Building2,
   CalendarCheck,
   Car,
   Check,
   Clock,
+  Flower2,
   MessageSquare,
+  PhoneOff,
   Scissors,
-  Smartphone,
   Sparkles,
   X,
 } from "lucide-react";
@@ -39,7 +39,7 @@ const INDUSTRIES = [
   },
   {
     id: "spa",
-    icon: Building2,
+    icon: Flower2,
     label: "Spa y más",
     examples: "Masajes, faciales, depilación",
     scenario: "Varias cabinas y servicios de distinta duración",
@@ -63,7 +63,7 @@ const BENEFITS = [
 const STATS = [
   { icon: Clock, value: "−3 h", label: "menos coordinación al día" },
   { icon: CalendarCheck, value: "0", label: "dobles reservas" },
-  { icon: Smartphone, value: "24/7", label: "reservas sin llamadas" },
+  { icon: PhoneOff, value: "24/7", label: "reservas sin llamadas" },
 ];
 
 function CompareVisual({ active }) {
@@ -97,8 +97,8 @@ function CompareVisual({ active }) {
         <ul className="landing-compare-list">
           {PAIN_POINTS.map((item) => (
             <li key={item}>
-              <X className="landing-compare-list-icon landing-compare-list-icon--bad" strokeWidth={2.5} />
-              {item}
+              <X className="landing-compare-list-icon landing-compare-list-icon--bad" strokeWidth={2.5} aria-hidden />
+              <span>{item}</span>
             </li>
           ))}
         </ul>
@@ -139,8 +139,8 @@ function CompareVisual({ active }) {
         <ul className="landing-compare-list">
           {BENEFITS.map((item) => (
             <li key={item}>
-              <Check className="landing-compare-list-icon landing-compare-list-icon--good" strokeWidth={2.5} />
-              {item}
+              <Check className="landing-compare-list-icon landing-compare-list-icon--good" strokeWidth={2.5} aria-hidden />
+              <span>{item}</span>
             </li>
           ))}
         </ul>

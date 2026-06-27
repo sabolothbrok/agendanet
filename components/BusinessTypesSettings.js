@@ -7,40 +7,36 @@ import {
   platformUpdateBusinessType,
 } from "@/app/actions/platform";
 import { useConfirm } from "@/hooks/useConfirm";
+import { useToast } from "@/hooks/useToast";
 
 export default function BusinessTypesSettings({ types: initial }) {
   const [types, setTypes] = useState(initial);
   const [label, setLabel] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editLabel, setEditLabel] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const { confirm, dialog } = useConfirm();
+  const toast = useToast();
 
   function addType(e) {
     e.preventDefault();
-    setMessage("");
-    setError("");
     const fd = new FormData(e.target);
     startTransition(async () => {
       const res = await platformAddBusinessType(fd);
       if (res.error) {
-        setError(res.error);
+        toast.error(res.error);
         return;
       }
       setTypes((list) => [...list, res.type]);
       setLabel("");
       e.target.reset();
-      setMessage("Tipo de negocio agregado.");
+      toast.success("Tipo de negocio agregado.");
     });
   }
 
   function startEdit(type) {
     setEditingId(type.id);
     setEditLabel(type.label);
-    setMessage("");
-    setError("");
   }
 
   function cancelEdit() {
@@ -49,19 +45,17 @@ export default function BusinessTypesSettings({ types: initial }) {
   }
 
   function saveEdit(id) {
-    setMessage("");
-    setError("");
     startTransition(async () => {
       const res = await platformUpdateBusinessType(id, editLabel);
       if (res.error) {
-        setError(res.error);
+        toast.error(res.error);
         return;
       }
       setTypes((list) =>
         list.map((t) => (t.id === id ? { ...t, label: editLabel.trim() } : t))
       );
       setEditingId(null);
-      setMessage("Nombre actualizado.");
+      toast.success("Nombre actualizado.");
     });
   }
 
@@ -74,16 +68,14 @@ export default function BusinessTypesSettings({ types: initial }) {
     });
     if (!ok) return;
 
-    setMessage("");
-    setError("");
     startTransition(async () => {
       const res = await platformDeleteBusinessType(type.id);
       if (res.error) {
-        setError(res.error);
+        toast.error(res.error);
         return;
       }
       setTypes((list) => list.filter((t) => t.id !== type.id));
-      setMessage("Tipo eliminado.");
+      toast.success("Tipo eliminado.");
     });
   }
 
@@ -175,9 +167,6 @@ export default function BusinessTypesSettings({ types: initial }) {
           </li>
         )}
       </ul>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {message && <p className="text-sm text-green-700">{message}</p>}
     </div>
   );
 }

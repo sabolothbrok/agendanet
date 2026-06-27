@@ -2,41 +2,46 @@
 
 import { useState, useTransition } from "react";
 import { adminRenameSpace, adminSetSpaceCount } from "@/app/actions/admin";
+import { useToast } from "@/hooks/useToast";
 
 export default function SpacesSettings({ slug, spaces: initial }) {
   const [spaces, setSpaces] = useState(initial);
-  const [count, setCount] = useState(initial.length || 1);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [count, setCount] = useState(String(initial.length || 1));
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   function applyCount() {
-    setMessage("");
-    setError("");
+    const n = Number(count);
+    if (!Number.isInteger(n) || n < 1 || n > 20) {
+      toast.error("Ingresa un número entre 1 y 20.");
+      return;
+    }
+
     startTransition(async () => {
-      const res = await adminSetSpaceCount(slug, count);
+      const res = await adminSetSpaceCount(slug, n);
       if (res.error) {
-        setError(res.error);
+        toast.error(res.error);
         return;
       }
-      setMessage("Cantidad de estaciones actualizada.");
-      window.location.reload();
+      if (res.spaces) {
+        setSpaces(res.spaces);
+        setCount(String(res.spaces.length));
+      }
+      toast.success("Cantidad de estaciones actualizada.");
     });
   }
 
   function rename(spaceId, name) {
-    setMessage("");
-    setError("");
     startTransition(async () => {
       const res = await adminRenameSpace(slug, spaceId, name);
       if (res.error) {
-        setError(res.error);
+        toast.error(res.error);
         return;
       }
       setSpaces((prev) =>
         prev.map((s) => (s.id === spaceId ? { ...s, name: name.trim() } : s))
       );
-      setMessage("Nombre guardado.");
+      toast.success("Nombre de estación guardado.");
     });
   }
 
@@ -56,12 +61,20 @@ export default function SpacesSettings({ slug, spaces: initial }) {
         </label>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
-            type="number"
-            min={1}
-            max={20}
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
             value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "");
+              if (digits === "") {
+                setCount("");
+                return;
+              }
+              setCount(String(parseInt(digits, 10)));
+            }}
             className="input sm:max-w-[8rem]"
+            aria-label="Cantidad de estaciones"
           />
           <button
             type="button"
@@ -97,9 +110,6 @@ export default function SpacesSettings({ slug, spaces: initial }) {
           </p>
         </div>
       )}
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {message && <p className="text-sm text-green-700">{message}</p>}
 
       <p className="rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
         Si reduces la cantidad, se ocultan las últimas estaciones. No se pueden quitar

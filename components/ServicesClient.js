@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { adminDeleteService, adminSaveService } from "@/app/actions/admin";
 import { formatOptionalPrice } from "@/lib/utils";
 import { useConfirm } from "@/hooks/useConfirm";
+import { useToast } from "@/hooks/useToast";
 
 const emptyForm = {
   id: "",
@@ -42,12 +43,12 @@ function clearValidity(event) {
 export default function ServicesClient({ slug, services: initial }) {
   const [services, setServices] = useState(initial);
   const [form, setForm] = useState(emptyForm);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const formRef = useRef(null);
   const formSectionRef = useRef(null);
   const { confirm, dialog } = useConfirm();
+  const toast = useToast();
 
   const isEditing = Boolean(form.id);
 
@@ -65,14 +66,12 @@ export default function ServicesClient({ slug, services: initial }) {
       is_premium: service.is_premium,
       is_active: service.is_active,
     });
-    setMessage("");
     setError("");
     formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function submit(e) {
     e.preventDefault();
-    setMessage("");
     setError("");
 
     const fd = new FormData(e.target);
@@ -85,10 +84,11 @@ export default function ServicesClient({ slug, services: initial }) {
       const res = await adminSaveService(slug, fd);
       if (res.error) {
         setError(res.error);
+        toast.error(res.error);
         return;
       }
 
-      const saved = {
+      const saved = res.service || {
         id: form.id || crypto.randomUUID(),
         name: form.name,
         duration_minutes: Number(form.duration_minutes),
@@ -99,10 +99,10 @@ export default function ServicesClient({ slug, services: initial }) {
 
       if (isEditing) {
         setServices((list) => list.map((s) => (s.id === saved.id ? { ...s, ...saved } : s)));
-        setMessage("Servicio actualizado.");
+        toast.success("Servicio actualizado.");
       } else {
-        window.location.reload();
-        return;
+        setServices((list) => [...list, saved]);
+        toast.success("Servicio agregado.");
       }
       resetForm();
     });
@@ -118,22 +118,22 @@ export default function ServicesClient({ slug, services: initial }) {
       cancelLabel: "Volver",
     });
     if (!ok) return;
-    setMessage("");
     setError("");
     startTransition(async () => {
       const res = await adminDeleteService(slug, service.id);
       if (res.error) {
         setError(res.error);
+        toast.error(res.error);
         return;
       }
       if (res.deactivated) {
         setServices((list) =>
           list.map((s) => (s.id === service.id ? { ...s, is_active: false } : s))
         );
-        setMessage(`"${service.name}" se desactivó porque tiene citas asociadas.`);
+        toast.info(`"${service.name}" se desactivó porque tiene citas asociadas.`);
       } else {
         setServices((list) => list.filter((s) => s.id !== service.id));
-        setMessage("Servicio eliminado.");
+        toast.success("Servicio eliminado.");
       }
       if (form.id === service.id) resetForm();
     });
@@ -311,7 +311,6 @@ export default function ServicesClient({ slug, services: initial }) {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {message && <p className="text-sm text-green-700">{message}</p>}
     </div>
   );
 }

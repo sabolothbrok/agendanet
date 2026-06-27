@@ -43,6 +43,8 @@ function SlotCell({
   isSelected,
   spaceId,
   time,
+  date,
+  duration,
   currentCustomerId,
   onSelectSlot,
   onToggleBlock,
@@ -61,7 +63,7 @@ function SlotCell({
 
     return (
       <div
-        className={`slot-cell slot-cell-booked h-full ${
+        className={`slot-cell slot-cell-stack h-full ${
           isOwn ? "slot-own" : "slot-booked"
         }`}
       >
@@ -75,7 +77,7 @@ function SlotCell({
           <button
             type="button"
             onClick={() => onCancelAppointment(apt.id)}
-            className="mt-1 text-red-600 hover:underline"
+            className="mt-1 text-xs text-red-600 hover:underline"
           >
             Cancelar
           </button>
@@ -85,14 +87,19 @@ function SlotCell({
   }
 
   if (status.type === "blocked") {
+    const block = status.data;
+
     return (
-      <div className="slot-cell slot-blocked h-full text-gray-400">
-        No disponible
+      <div className="slot-cell slot-blocked slot-cell-stack h-full">
+        <p className="font-medium text-gray-700">No disponible</p>
+        <p className="text-gray-500">
+          {formatTime(block.start_at)} – {formatTime(block.end_at)}
+        </p>
         {mode === "admin" && onToggleBlock && (
           <button
             type="button"
             onClick={() => onToggleBlock({ spaceId, time, block: false })}
-            className="mt-1 block w-full text-gray-600 hover:underline"
+            className="mt-1 text-xs font-medium text-gray-700 hover:underline"
           >
             Habilitar
           </button>
@@ -102,9 +109,15 @@ function SlotCell({
   }
 
   if (status.type === "unavailable") {
+    const start = combineDateAndTime(date, time);
+    const end = addMinutes(start, duration);
+
     return (
-      <div className="slot-cell slot-unavailable h-full">
-        No disponible
+      <div className="slot-cell slot-unavailable slot-cell-stack h-full">
+        <p className="font-medium text-gray-500">Fuera de horario</p>
+        <p className="text-gray-400">
+          {formatTime(start)} – {formatTime(end)}
+        </p>
       </div>
     );
   }
@@ -206,6 +219,8 @@ export default function DayCalendar({
                         isSelected={isSelected}
                         spaceId={sp.id}
                         time={time}
+                        date={date}
+                        duration={duration}
                         currentCustomerId={currentCustomerId}
                         onSelectSlot={onSelectSlot}
                         onToggleBlock={onToggleBlock}
@@ -264,6 +279,8 @@ export default function DayCalendar({
                         isSelected={isSelected}
                         spaceId={sp.id}
                         time={time}
+                        date={date}
+                        duration={duration}
                         currentCustomerId={currentCustomerId}
                         onSelectSlot={onSelectSlot}
                         onToggleBlock={onToggleBlock}

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import DayCalendar from "@/components/DayCalendar";
 import { customerBook } from "@/app/actions/customer";
+import { useToast } from "@/hooks/useToast";
 import {
   addMinutes,
   combineDateAndTime,
@@ -26,6 +27,7 @@ export default function BookingClient({
   const [selectedServices, setSelectedServices] = useState([]);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   const duration = (() => {
     if (!business.show_services_list || !selectedServices.length) {
@@ -86,7 +88,10 @@ export default function BookingClient({
 
     startTransition(async () => {
       const res = await customerBook(slug, fd);
-      if (res?.error) setError(res.error);
+      if (res?.error) {
+        setError(res.error);
+        toast.error(res.error);
+      }
     });
   }
 

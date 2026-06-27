@@ -3,22 +3,20 @@
 import { useState, useTransition } from "react";
 import { platformUpdateProfile } from "@/app/actions/platform";
 import { formatPhone } from "@/lib/utils";
+import { useToast } from "@/hooks/useToast";
 
 export default function PlatformSettingsForm({ profile }) {
   const [name, setName] = useState(profile.name);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   function handleSubmit(e) {
     e.preventDefault();
-    setMessage("");
-    setError("");
     const fd = new FormData(e.target);
     startTransition(async () => {
       const res = await platformUpdateProfile(fd);
-      if (res?.error) setError(res.error);
-      else setMessage("Perfil actualizado.");
+      if (res?.error) toast.error(res.error);
+      else toast.success("Perfil actualizado.");
     });
   }
 
@@ -52,9 +50,6 @@ export default function PlatformSettingsForm({ profile }) {
         />
         <p className="mt-1 text-xs text-gray-500">El teléfono no se puede cambiar.</p>
       </div>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {message && <p className="text-sm text-green-700">{message}</p>}
 
       <button type="submit" disabled={isPending} className="btn btn-primary w-full sm:w-auto">
         Guardar cambios

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { platformCreateBusiness } from "@/app/actions/platform";
 import { slugify } from "@/lib/utils";
+import { useToast } from "@/hooks/useToast";
 
 export default function CreateBusinessForm({ businessTypes }) {
   const [name, setName] = useState("");
@@ -11,6 +12,7 @@ export default function CreateBusinessForm({ businessTypes }) {
   const [slugTouched, setSlugTouched] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   function onNameChange(value) {
     setName(value);
@@ -23,7 +25,10 @@ export default function CreateBusinessForm({ businessTypes }) {
     const fd = new FormData(e.target);
     startTransition(async () => {
       const res = await platformCreateBusiness(fd);
-      if (res?.error) setError(res.error);
+      if (res?.error) {
+        setError(res.error);
+        toast.error(res.error);
+      }
     });
   }
 

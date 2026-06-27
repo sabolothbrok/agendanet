@@ -8,11 +8,13 @@ import {
   Settings,
   LogOut,
   ArrowLeft,
+  BarChart3,
 } from "lucide-react";
 
 const links = [
   { href: "", label: "Inicio", short: "Inicio", icon: LayoutDashboard },
   { href: "/calendar", label: "Calendario", short: "Agenda", icon: Calendar },
+  { href: "/reports", label: "Reporte", short: "Reporte", icon: BarChart3 },
   { href: "/customers", label: "Clientes", short: "Clientes", icon: Users },
   { href: "/services", label: "Servicios", short: "Servicios", icon: ClipboardList },
   { href: "/settings", label: "Configuración", short: "Ajustes", icon: Settings },
@@ -97,7 +99,7 @@ export default function AdminNav({ slug, businessName, current, isPlatformAdmin 
         className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
         aria-label="Navegación admin"
       >
-        <div className="grid grid-cols-5 gap-0">
+        <div className="grid grid-cols-6 gap-0">
           {links.map(({ href, short, icon: Icon }) => (
             <Link
               key={href}

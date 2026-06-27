@@ -13,6 +13,7 @@ import {
   listCustomers,
   listNotifications,
   listServices,
+  listSpaces,
   markNotificationRead,
   toggleCustomerPremium,
   updateBusinessSettings,
@@ -121,7 +122,7 @@ export async function adminSaveService(slug, formData) {
   const auth = await guard(slug);
   if (auth.error) return { error: "No autorizado" };
 
-  await upsertService(auth.business.id, {
+  const service = await upsertService(auth.business.id, {
     id: formData.get("id") || null,
     name: formData.get("name"),
     duration_minutes: Number(formData.get("duration_minutes")),
@@ -132,7 +133,7 @@ export async function adminSaveService(slug, formData) {
 
   revalidatePath(`/b/${slug}/admin/services`);
   revalidatePath(`/b/${slug}/app`);
-  return { success: true };
+  return { success: true, service };
 }
 
 export async function adminDeleteService(slug, serviceId) {
@@ -171,10 +172,12 @@ export async function adminSetSpaceCount(slug, count) {
   const result = await syncSpaceCount(auth.business.id, Number(count));
   if (result.error) return { error: result.error };
 
+  const spaces = await listSpaces(auth.business.id);
+
   revalidatePath(`/b/${slug}/admin/settings`);
   revalidatePath(`/b/${slug}/admin/calendar`);
   revalidatePath(`/b/${slug}/app`);
-  return { success: true };
+  return { success: true, spaces };
 }
 
 export async function adminRenameSpace(slug, spaceId, name) {

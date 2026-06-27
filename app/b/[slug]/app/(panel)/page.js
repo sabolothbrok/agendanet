@@ -1,4 +1,6 @@
 import BookingClient from "@/components/BookingClient";
+import BookedToast from "@/components/BookedToast";
+import { Suspense } from "react";
 import { getSession } from "@/lib/session";
 import { requireCustomerSession } from "@/lib/auth";
 import { getCalendarData, listServices } from "@/lib/queries";
@@ -24,11 +26,9 @@ export default async function ClientHomePage({ params, searchParams }) {
 
   return (
     <>
-      {sp?.booked && (
-        <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-          ¡Reserva confirmada! Revisa el detalle en Mis reservas.
-        </div>
-      )}
+      <Suspense fallback={null}>
+        <BookedToast />
+      </Suspense>
       <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Reservar cita</h1>
       <p className="mt-1 text-sm text-gray-600 sm:text-base">
         Elige un espacio disponible en el calendario

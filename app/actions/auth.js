@@ -1,6 +1,6 @@
 "use server";
 
-import { loginAdmin, loginCustomer, loginPlatformAdmin } from "@/lib/auth";
+import { loginAdmin, loginCustomer, loginPlatformAdmin, resolveUniversalLogin } from "@/lib/auth";
 import {
   createCustomer,
   getInviteByToken,
@@ -8,6 +8,19 @@ import {
 import { setSession, clearSession } from "@/lib/session";
 import { normalizePhone } from "@/lib/utils";
 import { redirect } from "next/navigation";
+
+export async function universalLoginAction(formData) {
+  const phone = formData.get("phone");
+  const destination = formData.get("destination") || null;
+  const result = await resolveUniversalLogin(phone, destination);
+  if (result.error) return { error: result.error };
+  if (result.destinations) return { destinations: result.destinations };
+
+  await setSession(result.session);
+  if (result.session.role === "platform_admin") redirect("/platform");
+  if (result.session.role === "admin") redirect(`/b/${result.session.businessSlug}/admin`);
+  redirect(`/b/${result.session.businessSlug}/app`);
+}
 
 export async function platformLoginAction(formData) {
   const phone = formData.get("phone");

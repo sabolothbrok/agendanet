@@ -1,65 +1,92 @@
 import Link from "next/link";
 import IndustriesSection from "@/components/IndustriesSection";
 import LandingNav from "@/components/LandingNav";
+import WeeklyReportChart from "@/components/WeeklyReportChart";
 import {
+  Banknote,
   Bell,
   Building2,
   Calendar,
+  ChartColumn,
   Check,
-  Shield,
-  Smartphone,
-  Sparkles,
+  ClipboardList,
+  CreditCard,
+  LayoutGrid,
+  List,
+  Timer,
   Users,
 } from "lucide-react";
+
+const HERO_PROOF = [
+  { icon: CreditCard, text: "Sin tarjeta de crédito" },
+  { icon: Timer, text: "Configuración en minutos" },
+  { icon: Banknote, text: "Precios en colones" },
+];
+
+const HERO_WEEK = [
+  { label: "Lun", value: 64, date: "demo-lun" },
+  { label: "Mar", value: 72, date: "demo-mar" },
+  { label: "Mié", value: 68, date: "demo-mie" },
+  { label: "Jue", value: 81, date: "demo-jue" },
+  { label: "Vie", value: 88, date: "demo-vie" },
+  { label: "Sáb", value: 92, date: "demo-sab" },
+  { label: "Dom", value: 45, date: "demo-dom" },
+];
+
+const HERO_KPIS = [
+  { icon: LayoutGrid, value: "76%", label: "ocupación promedio de estaciones" },
+  { icon: Timer, value: "12 min", label: "tiempo promedio de reserva" },
+  { icon: Users, value: "En vivo", label: "calendario compartido por equipo" },
+];
 
 const FEATURES = [
   {
     icon: Building2,
     title: "Multi-negocio",
-    text: "Varios locales en una cuenta: uñas, barbería, lavacar y más.",
+    text: "Varios locales en una sola cuenta. Cambia de sucursal sin cerrar sesión.",
   },
   {
     icon: Calendar,
     title: "Calendario por estaciones",
-    text: "Disponibilidad en tiempo real. Bloquea horarios o cancela citas al instante.",
+    text: "Cada bahía, silla o cabina en su columna. Disponibilidad actualizada al instante.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Servicios con duración y precio",
+    text: "Arma tu catálogo una vez. Cada reserva usa el tiempo correcto del servicio.",
   },
   {
     icon: Users,
-    title: "Clientes e invitaciones",
-    text: "Enlaces seguros, clientes premium e historial de reservas.",
+    title: "Base de clientes",
+    text: "Historial de visitas, clientes premium y control de quién puede reservar.",
   },
   {
     icon: Bell,
-    title: "Notificaciones",
-    text: "Avisos de reservas y cancelaciones sin SMS ni correo.",
+    title: "Notificaciones internas",
+    text: "Avisos de reservas y cancelaciones dentro de la plataforma, sin correo ni SMS.",
   },
   {
-    icon: Smartphone,
-    title: "Listo para móvil",
-    text: "Tus clientes reservan en segundos desde el teléfono.",
-  },
-  {
-    icon: Shield,
-    title: "Roles claros",
-    text: "Admin general, admin de negocio y cliente, cada uno con su vista.",
+    icon: ChartColumn,
+    title: "Reporte semanal",
+    text: "Ocupación por día y actividad de la semana para ajustar horarios y personal.",
   },
 ];
 
 const STEPS = [
   {
     n: 1,
-    title: "Crea tu negocio",
-    text: "Regístrate, define horarios, estaciones y servicios.",
+    title: "Arma tu perfil",
+    text: "Horarios, estaciones y servicios desde el panel. Listo en minutos, sin tarjeta.",
   },
   {
     n: 2,
-    title: "Invita clientes",
-    text: "Comparte un enlace. Ellos se registran con su teléfono.",
+    title: "Comparte el enlace",
+    text: "Mándalo por WhatsApp o donde prefieras. Tus clientes entran con su teléfono.",
   },
   {
     n: 3,
-    title: "Recibe reservas",
-    text: "El calendario se actualiza solo. Tú gestionas desde el panel.",
+    title: "Recibe las reservas",
+    text: "Cada cita aparece sola en el calendario. Tú confirmas, cancelas o bloqueas cuando haga falta.",
   },
 ];
 
@@ -92,7 +119,7 @@ const PLANS = [
     featured: false,
     perks: [
       "Negocios ilimitados",
-      "Admins general y locales",
+      "Administradores por sucursal",
       "Tipos de negocio custom",
       "Soporte prioritario",
       "Onboarding asistido",
@@ -113,8 +140,8 @@ function SectionHead({ tag, title, desc, align = "center" }) {
 function CheckItem({ children }) {
   return (
     <li>
-      <Check className="landing-check-icon" strokeWidth={2.5} />
-      {children}
+      <Check className="landing-check-icon" strokeWidth={2.5} aria-hidden />
+      <span>{children}</span>
     </li>
   );
 }
@@ -122,7 +149,7 @@ function CheckItem({ children }) {
 function AdminSlot({ type, label }) {
   const className =
     type === "booked"
-      ? "slot-cell slot-cell-booked slot-booked landing-slot-mini"
+      ? "slot-cell slot-cell-stack slot-booked landing-slot-mini"
       : type === "sel"
         ? "slot-cell slot-selected landing-slot-mini"
         : type === "block"
@@ -158,7 +185,7 @@ function BrowserPreview({ children }) {
     <div className="landing-browser">
       <div className="landing-browser-bar">
         <span /><span /><span />
-        <div className="landing-browser-url">agendanet.app/b/demo-unas/admin</div>
+        <div className="landing-browser-url">agendanet.app/b/mi-salon/admin</div>
       </div>
       <div className="landing-browser-content">{children}</div>
     </div>
@@ -170,58 +197,111 @@ function PhonePreview() {
     <div className="landing-phone-device">
       <div className="landing-phone">
         <div className="landing-phone-screen">
-          <div className="landing-phone-header">
-            <p className="landing-phone-brand">Demo Uñas</p>
-            <p className="landing-phone-title">Reservar cita</p>
-          </div>
-          <div className="landing-phone-body">
-            <div className="landing-phone-date">
-              <span className="landing-phone-date-label">Fecha</span>
-              <span className="landing-phone-date-value">Martes, 24 de junio</span>
+          <header className="landing-phone-app-header">
+            <div className="min-w-0">
+              <p className="landing-phone-business">Demo Uñas</p>
+              <p className="landing-phone-user">María</p>
+              <p className="landing-phone-phone">6666-0000</p>
+            </div>
+          </header>
+
+          <div className="landing-phone-scroll">
+            <h2 className="landing-phone-page-title">Reservar cita</h2>
+            <p className="landing-phone-page-desc">
+              Elige un espacio disponible en el calendario
+            </p>
+
+            <div className="landing-phone-date-row">
+              <label className="landing-phone-field-label">Fecha</label>
+              <div className="landing-phone-date-input">2026-06-24</div>
             </div>
 
-            <div className="landing-phone-hours">
-              <div className="landing-phone-hour card">
-                <p className="landing-phone-hour-label">10:00 a. m.</p>
-                <p className="landing-phone-hour-station">Estación 2</p>
-                <div className="slot-cell slot-selected landing-slot-mini">Disponible</div>
-              </div>
-              <div className="landing-phone-hour card">
-                <p className="landing-phone-hour-label">10:30 a. m.</p>
-                <p className="landing-phone-hour-station">Estación 1</p>
-                <div className="slot-cell slot-booked landing-slot-mini">Reservado</div>
+            <div className="landing-phone-slot-card card">
+              <p className="landing-phone-slot-time">10:00 a. m.</p>
+              <div className="landing-phone-slot-grid">
+                <div className="landing-phone-slot-item">
+                  <p className="landing-phone-station">Estación 1</p>
+                  <div className="slot-cell slot-booked landing-slot-mini">Reservado</div>
+                </div>
+                <div className="landing-phone-slot-item">
+                  <p className="landing-phone-station">Estación 2</p>
+                  <div className="slot-cell slot-selected landing-slot-mini">Disponible</div>
+                </div>
               </div>
             </div>
 
-            <div className="landing-phone-services">
-              <p className="landing-phone-services-label">Servicios</p>
+            <div className="landing-phone-slot-card card">
+              <p className="landing-phone-slot-time">10:30 a. m.</p>
+              <div className="landing-phone-slot-grid">
+                <div className="landing-phone-slot-item">
+                  <p className="landing-phone-station">Estación 1</p>
+                  <div className="slot-cell slot-available landing-slot-mini">Disponible</div>
+                </div>
+                <div className="landing-phone-slot-item">
+                  <p className="landing-phone-station">Estación 2</p>
+                  <div className="slot-cell slot-blocked slot-cell-stack landing-slot-mini">
+                    <p className="font-medium text-gray-700">No disponible</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="landing-phone-form card">
+              <p className="landing-phone-form-title">Servicios</p>
               {[
-                { name: "Manicure gel", meta: "60 min" },
-                { name: "Nail art", meta: "30 min" },
+                { name: "Manicure gel", meta: "60 min · ₡28,000", checked: true },
+                { name: "Pedicure", meta: "60 min · ₡22,000", checked: false },
               ].map((s) => (
                 <div key={s.name} className="landing-phone-service">
                   <span className="landing-phone-service-name">
-                    <input type="checkbox" checked disabled aria-hidden tabIndex={-1} />
+                    <input type="checkbox" checked={s.checked} readOnly aria-hidden tabIndex={-1} />
                     {s.name}
                   </span>
                   <span className="landing-phone-service-meta">{s.meta}</span>
                 </div>
               ))}
-            </div>
 
-            <span className="btn btn-primary landing-phone-cta" aria-hidden="true">
-              Confirmar reserva
+              <div className="landing-phone-summary">
+                <p className="landing-phone-summary-title">Resumen</p>
+                <p className="landing-phone-summary-line">martes, 24 de junio de 2026</p>
+                <p className="landing-phone-summary-line">10:00 a. m. – 11:00 a. m. (60 min)</p>
+              </div>
+
+              <span className="btn btn-primary landing-phone-cta" aria-hidden="true">
+                Confirmar reserva
+              </span>
+            </div>
+          </div>
+
+          <nav className="landing-phone-tabbar" aria-hidden>
+            <span className="landing-phone-tab landing-phone-tab--active">
+              <Calendar className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+              Reservar
             </span>
-          </div>
-          <div className="landing-phone-tabbar" aria-hidden>
-            <span className="landing-phone-tab landing-phone-tab--active">Reservar</span>
-            <span className="landing-phone-tab">Mis reservas</span>
-          </div>
+            <span className="landing-phone-tab">
+              <List className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+              Reservas
+            </span>
+          </nav>
+
           <div className="landing-phone-home" aria-hidden />
         </div>
         <div className="landing-phone-island" aria-hidden />
       </div>
     </div>
+  );
+}
+
+function HeroGraphic() {
+  return (
+    <WeeklyReportChart
+      variant="landing"
+      eyebrow="Visibilidad operativa"
+      title="Ocupación de estaciones en la semana"
+      description="Con reservas en línea ves qué días llenan más tus estaciones y dónde aún hay capacidad disponible."
+      days={HERO_WEEK}
+      kpis={HERO_KPIS}
+    />
   );
 }
 
@@ -231,7 +311,7 @@ function AdminPreview() {
       <div className="landing-admin-inner">
         <div className="landing-admin-toolbar">
           <div>
-            <p className="landing-admin-toolbar-label">Demo Uñas</p>
+            <p className="landing-admin-toolbar-label">Salón Bella</p>
             <p className="landing-admin-toolbar-title">Calendario</p>
           </div>
           <span className="badge badge-neutral">3 citas hoy</span>
@@ -298,42 +378,45 @@ function AdminPreview() {
   );
 }
 
-export default function MarketingHome({ businesses = [] }) {
+export default function MarketingHome() {
   return (
     <div className="landing">
       <LandingNav />
 
       <section className="landing-hero">
-        <div className="landing-container landing-hero-inner">
-          <p className="landing-pill">
-            <Sparkles className="h-4 w-4" />
-            Plataforma de citas para pequeños negocios
-          </p>
-          <h1 className="landing-h1">
-            Reservas online para todos tus negocios, en un solo lugar
-          </h1>
-          <p className="landing-hero-text">
-            Centraliza calendarios, clientes y notificaciones. Tus clientes reservan desde
-            el celular; tú controlas todo desde un panel web claro y profesional.
-          </p>
-          <div className="landing-hero-btns">
-            <Link href="#demo" className="landing-btn-primary landing-btn-lg">
-              Probar demo
-            </Link>
-            <Link href="#precios" className="landing-btn-secondary landing-btn-lg">
-              Ver precios
-            </Link>
-          </div>
-          <ul className="landing-hero-trust">
-            {["Sin tarjeta de crédito", "Configuración en minutos", "Precios en colones"].map(
-              (item) => (
-                <li key={item}>
-                  <Check className="landing-check-icon" strokeWidth={2.5} />
-                  {item}
+        <div className="landing-hero-bg" aria-hidden />
+        <div className="landing-container landing-hero-grid">
+          <div className="landing-hero-copy">
+            <p className="landing-eyebrow">Software de reservas para negocios locales</p>
+            <h1 className="landing-h1">
+              Citas, calendario y clientes en una sola plataforma
+            </h1>
+            <p className="landing-hero-text">
+              AgendaNet centraliza la operación de tus locales. Tus clientes reservan desde
+              el celular; tú administras horarios, estaciones y equipo desde un panel claro.
+            </p>
+            <div className="landing-hero-btns">
+              <Link href="#precios" className="landing-btn-primary landing-btn-lg">
+                Ver planes
+              </Link>
+              <Link href="#funciones" className="landing-btn-secondary landing-btn-lg">
+                Ver funciones
+              </Link>
+            </div>
+            <ul className="landing-hero-proof">
+              {HERO_PROOF.map(({ icon: Icon, text }) => (
+                <li key={text} className="landing-hero-proof-item">
+                  <span className="landing-hero-proof-icon" aria-hidden>
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="landing-hero-proof-text">{text}</span>
                 </li>
-              )
-            )}
-          </ul>
+              ))}
+            </ul>
+          </div>
+          <div className="landing-hero-visual">
+            <HeroGraphic />
+          </div>
         </div>
       </section>
 
@@ -349,7 +432,6 @@ export default function MarketingHome({ businesses = [] }) {
             "Multi-negocio: cambia de local sin salir de la plataforma",
           ]}
           visual={<AdminPreview />}
-          cta={{ href: "/b/demo-unas/admin/login", label: "Probar panel admin" }}
         />
       </section>
 
@@ -374,8 +456,8 @@ export default function MarketingHome({ businesses = [] }) {
       <section id="funciones" className="landing-container landing-pad">
         <SectionHead
           tag="Funciones"
-          title="Todo para dejar el papel atrás"
-          desc="Simple para ti y para tus clientes."
+          title="Qué incluye la plataforma"
+          desc="Capacidades para operar citas, clientes y varios locales sin herramientas extra."
         />
         <div className="landing-features">
           {FEATURES.map(({ icon: Icon, title, text }) => (
@@ -393,9 +475,9 @@ export default function MarketingHome({ businesses = [] }) {
       <section id="como-funciona" className="landing-band">
         <div className="landing-container landing-pad">
         <SectionHead
-          tag="Cómo funciona"
-          title="De la invitación a la reserva en tres pasos"
-          desc="Un flujo claro para empezar el mismo día."
+          tag="¿Cómo funciona?"
+          title="Tres pasos para empezar hoy"
+          desc="Configuras, compartes el enlace y recibes reservas el mismo día."
         />
         <ol className="landing-steps">
           {STEPS.map((step) => (
@@ -417,8 +499,8 @@ export default function MarketingHome({ businesses = [] }) {
         <div className="landing-container landing-pad">
           <SectionHead
             tag="Precios"
-            title="Planes claros, sin comisiones"
-            desc="Ejemplos mensuales en colones. Sin cobro por cita."
+            title="Planes transparentes, sin comisiones"
+            desc="Tarifas mensuales en colones. Sin cobro por cita ni cargos ocultos."
           />
           <div className="landing-pricing">
             {PLANS.map((plan) => (
@@ -434,106 +516,58 @@ export default function MarketingHome({ businesses = [] }) {
                 <ul className="landing-plan-list">
                 {plan.perks.map((p) => (
                   <li key={p}>
-                    <Check className="landing-check-icon" strokeWidth={2.5} />
-                    {p}
+                    <Check className="landing-check-icon" strokeWidth={2.5} aria-hidden />
+                    <span>{p}</span>
                   </li>
                 ))}
                 </ul>
-                <Link
-                  href="/platform/login"
-                  className={plan.featured ? "landing-btn-primary w-full" : "landing-btn-secondary w-full"}
-                >
-                  Empezar
-                </Link>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="demo" className="landing-container landing-pad">
-        <SectionHead
-          tag="Demo"
-          title="Pruébalo en vivo"
-          desc="Accesos de demostración y negocios de esta instancia."
-        />
-        <div className="landing-demo">
-          <div className="card p-6">
-            <p className="font-semibold text-gray-900">Accesos rápidos</p>
-            <ul className="mt-4 space-y-3 text-sm text-gray-600">
-              <li>
-                Admin general:{" "}
-                <Link href="/platform/login" className="font-medium text-gray-900 underline">
-                  /platform/login
-                </Link>{" "}
-                · 77770000
-              </li>
-              <li>
-                Admin demo:{" "}
-                <Link href="/b/demo-unas/admin/login" className="font-medium text-gray-900 underline">
-                  demo-unas
-                </Link>{" "}
-                · 88880000
-              </li>
-              <li>
-                Cliente demo:{" "}
-                <Link href="/b/demo-unas/app/login" className="font-medium text-gray-900 underline">
-                  /b/demo-unas/app/login
-                </Link>{" "}
-                · 66660000
-              </li>
-            </ul>
-          </div>
-          {businesses.length > 0 && (
-            <div className="card p-6">
-              <p className="font-semibold text-gray-900">Negocios activos</p>
-              <ul className="mt-4 space-y-3">
-                {businesses.map((b) => (
-                  <li
-                    key={b.id}
-                    className="flex flex-col gap-2 rounded-lg border border-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-gray-400">
-                        {b.business_type_label || b.business_type}
-                      </p>
-                      <p className="font-medium text-gray-900">{b.name}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href={`/b/${b.slug}/app/login`} className="landing-btn-ghost text-xs">
-                        Cliente
-                      </Link>
-                      <Link href={`/b/${b.slug}/admin/login`} className="landing-btn-primary text-xs !px-3 !py-2">
-                        Admin
-                      </Link>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </section>
-
       <section className="landing-cta">
         <div className="landing-container landing-cta-inner">
-          <h2 className="text-3xl font-bold text-white sm:text-4xl">
-            Empieza a recibir reservas hoy
+          <p className="landing-cta-eyebrow">Listo para modernizar tus reservas</p>
+          <h2 className="landing-cta-title">
+            Menos mensajes. Menos errores. Más citas confirmadas.
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-gray-300">
-            Configura tu primer negocio en minutos. Sin apps que descargar.
+          <p className="landing-cta-text">
+            Unifica calendarios, clientes y notificaciones en una plataforma diseñada para
+            negocios de servicios.
           </p>
-          <div className="mt-8 flex justify-center">
-            <Link href="/platform/login" className="landing-btn-cta-solid">
-              Crear cuenta
+          <div className="landing-cta-btns">
+            <Link href="#precios" className="landing-btn-primary landing-btn-lg">
+              Explorar planes
+            </Link>
+            <Link href="/login" className="landing-btn-secondary landing-btn-lg">
+              Iniciar sesión
             </Link>
           </div>
         </div>
       </section>
 
       <footer className="landing-footer">
-        <div className="landing-container py-8 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} AgendaNet · Plataforma multi-negocio de citas
+        <div className="landing-container landing-footer-inner">
+          <div className="landing-footer-brand">
+            <div className="landing-footer-logo">
+              <Calendar className="h-5 w-5" aria-hidden />
+              <span>AgendaNet</span>
+            </div>
+            <p className="landing-footer-desc">
+              Plataforma de reservas para salones, barberías, spas y negocios de servicios.
+            </p>
+          </div>
+          <nav className="landing-footer-nav" aria-label="Secciones">
+            <p className="landing-footer-nav-title">Producto</p>
+            <a href="#funciones">Funciones</a>
+            <a href="#como-funciona">¿Cómo funciona?</a>
+            <a href="#precios">Precios</a>
+          </nav>
+        </div>
+        <div className="landing-container landing-footer-bottom">
+          <p>© {new Date().getFullYear()} AgendaNet. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
