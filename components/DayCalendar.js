@@ -178,7 +178,7 @@ export default function DayCalendar({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-full min-w-0 space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <label className="text-sm font-medium text-gray-700">Fecha</label>
         <input
@@ -240,7 +240,7 @@ export default function DayCalendar({
       </div>
 
       {/* Desktop: tabla con scroll horizontal */}
-      <div className="scroll-table hidden overflow-x-auto rounded-lg border border-gray-200 bg-white md:block">
+      <div className="scroll-table hidden max-w-full rounded-lg border border-gray-200 bg-white md:block">
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">

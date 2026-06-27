@@ -96,22 +96,24 @@ export default function AdminNav({ slug, businessName, current, isPlatformAdmin 
 
       {/* Bottom nav — mobile */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="app-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white md:hidden"
         aria-label="Navegación admin"
       >
-        <div className="grid grid-cols-6 gap-0">
-          {links.map(({ href, short, icon: Icon }) => (
+        <div className="grid grid-cols-6 min-w-0">
+          {links.map(({ href, label, short, icon: Icon }) => (
             <Link
               key={href}
               href={`${base}${href}`}
-              className={`flex flex-col items-center justify-center gap-0.5 px-1 py-2.5 text-[10px] font-medium ${
+              aria-label={label}
+              aria-current={isActive(current, href) ? "page" : undefined}
+              className={`flex min-h-[3.25rem] flex-col items-center justify-center py-2 ${
                 isActive(current, href)
                   ? "text-gray-900"
                   : "text-gray-500"
               }`}
             >
-              <Icon size={20} strokeWidth={isActive(current, href) ? 2.25 : 1.75} />
-              <span className="truncate">{short}</span>
+              <Icon size={22} strokeWidth={isActive(current, href) ? 2.25 : 1.75} />
+              <span className="sr-only">{short}</span>
             </Link>
           ))}
         </div>

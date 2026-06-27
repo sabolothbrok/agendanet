@@ -56,7 +56,7 @@ export default function ClientNav({
         className="client-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white md:hidden"
         aria-label="Navegación cliente"
       >
-        <div className="grid grid-cols-2">
+        <div className="grid min-w-0 grid-cols-2">
           {links.map(({ href, short, icon: Icon }) => {
             const active = current === href;
             return (

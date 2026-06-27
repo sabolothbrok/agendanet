@@ -109,7 +109,7 @@ export default function BookingClient({
   const displayError = validationMessage || error;
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-full min-w-0 space-y-6">
       <DayCalendar
         mode="customer"
         business={business}

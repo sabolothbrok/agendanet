@@ -75,11 +75,30 @@ export default async function AdminReportsPage({ params }) {
             />
           </div>
 
-          <section className="card mt-6 overflow-x-auto">
-            <h2 className="px-4 pt-4 text-sm font-semibold text-gray-900 sm:px-6 sm:pt-6">
-              Detalle por día
-            </h2>
-            <table className="mt-4 w-full min-w-[480px] text-sm">
+          <section className="card mt-6 p-4 sm:p-6">
+            <h2 className="text-sm font-semibold text-gray-900">Detalle por día</h2>
+
+            <ul className="mt-4 space-y-2 md:hidden">
+              {report.days.map((day) => (
+                <li
+                  key={day.date}
+                  className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm"
+                >
+                  <p className="font-medium text-gray-900">
+                    {day.label}
+                    <span className="mt-0.5 block text-xs font-normal text-gray-500">
+                      {formatDateShort(day.date)}
+                    </span>
+                  </p>
+                  <p className="mt-1 text-gray-600">
+                    {day.value}% ocupación · {day.appointmentCount} citas · {day.bookedMinutes} min
+                  </p>
+                </li>
+              ))}
+            </ul>
+
+            <div className="table-scroll mt-4 hidden md:block">
+            <table className="w-full min-w-[480px] text-sm">
               <thead className="border-y border-gray-100 bg-gray-50 text-left">
                 <tr>
                   <th className="px-4 py-3 font-medium text-gray-600 sm:px-6">Día</th>
@@ -104,6 +123,7 @@ export default async function AdminReportsPage({ params }) {
                 ))}
               </tbody>
             </table>
+            </div>
           </section>
         </>
       )}

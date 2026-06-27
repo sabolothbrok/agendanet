@@ -15,9 +15,38 @@
   --color-surface: var(--surface);
 }
 
+html {
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .card {
@@ -488,7 +517,9 @@ body {
 /* Layout responsive — mobile-first */
 .page-main {
   width: 100%;
+  max-width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   padding-inline: 1rem;
   padding-top: 1rem;
   padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
@@ -513,11 +544,20 @@ body {
   }
 }
 
-.client-bottom-nav {
+.client-bottom-nav,
+.app-bottom-nav {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .scroll-table {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 

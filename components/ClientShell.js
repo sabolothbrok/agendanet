@@ -7,7 +7,7 @@ export default function ClientShell({ slug, businessName, customer, children, ma
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-gray-50">
+    <div className="app-shell min-h-screen overflow-x-clip bg-gray-50">
       <ClientNav
         slug={slug}
         businessName={businessName}
@@ -17,7 +17,7 @@ export default function ClientShell({ slug, businessName, customer, children, ma
         current={pathname}
       />
       <main
-        className={`page-main mx-auto w-full max-w-5xl min-w-0 overflow-x-hidden ${mainClassName || ""}`}
+        className={`page-main mx-auto w-full max-w-5xl min-w-0 overflow-x-clip ${mainClassName || ""}`}
       >
         {children}
       </main>

@@ -262,7 +262,8 @@ export default function ServicesClient({ slug, services: initial }) {
       </div>
 
       {/* Desktop */}
-      <div className="card hidden overflow-x-auto md:block">
+      <div className="card hidden md:block">
+        <div className="table-scroll">
         <table className="w-full min-w-[560px] text-sm">
           <thead className="border-b border-gray-200 bg-gray-50">
             <tr>
@@ -310,6 +311,7 @@ export default function ServicesClient({ slug, services: initial }) {
             ))}
           </tbody>
         </table>
+        </div>
         {services.length === 0 && (
           <p className="p-8 text-center text-gray-500">Sin servicios.</p>
         )}

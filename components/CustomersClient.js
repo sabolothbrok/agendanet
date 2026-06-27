@@ -183,7 +183,8 @@ export default function CustomersClient({ slug, customers: initial }) {
       </div>
 
       {/* Desktop: table */}
-      <div className="card hidden overflow-x-auto md:block">
+      <div className="card hidden md:block">
+        <div className="table-scroll">
         <table className="w-full min-w-[520px] text-sm">
           <thead className="border-b border-gray-200 bg-gray-50">
             <tr>
@@ -220,6 +221,7 @@ export default function CustomersClient({ slug, customers: initial }) {
             ))}
           </tbody>
         </table>
+        </div>
         {customers.length === 0 && (
           <p className="p-8 text-center text-gray-500">Aún no hay clientes.</p>
         )}
