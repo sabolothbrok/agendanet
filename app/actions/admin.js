@@ -67,27 +67,39 @@ export async function adminCancelAppointment(slug, appointmentId) {
   return { success: true };
 }
 
-export async function adminToggleBlock(slug, { spaceId, date, time, duration, block }) {
+export async function adminToggleBlock(slug, { spaceId, date, time, duration, block, blockId }) {
   const auth = await guard(slug);
   if (auth.error) return { error: "No autorizado" };
 
-  const { combineDateAndTime, addMinutes } = await import("@/lib/utils");
+  const { combineDateAndTime, addMinutes, overlaps } = await import("@/lib/utils");
   const startAt = combineDateAndTime(date, time);
   const endAt = addMinutes(startAt, duration || auth.business.min_appointment_minutes);
 
   if (block) {
-    await createSpaceBlock({ spaceId, startAt, endAt, reason: "No disponible" });
+    const { blocks } = await getCalendarData(auth.business.id, date);
+    const alreadyBlocked = blocks.some(
+      (b) =>
+        b.space_id === spaceId &&
+        overlaps(startAt, endAt, new Date(b.start_at), new Date(b.end_at))
+    );
+    if (!alreadyBlocked) {
+      await createSpaceBlock({ spaceId, startAt, endAt, reason: "No disponible" });
+    }
+  } else if (blockId) {
+    await deleteSpaceBlock(blockId, auth.business.id);
   } else {
     const { blocks } = await getCalendarData(auth.business.id, date);
     const match = blocks.find(
       (b) =>
         b.space_id === spaceId &&
-        new Date(b.start_at).getTime() === startAt.getTime()
+        overlaps(startAt, endAt, new Date(b.start_at), new Date(b.end_at))
     );
-    if (match) await deleteSpaceBlock(match.id, auth.business.id);
+    if (!match) return { error: "No hay bloqueo en este horario." };
+    await deleteSpaceBlock(match.id, auth.business.id);
   }
 
   revalidatePath(`/b/${slug}/admin/calendar`);
+  revalidatePath(`/b/${slug}/app`);
   return { success: true };
 }
 

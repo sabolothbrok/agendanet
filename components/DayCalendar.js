@@ -7,6 +7,7 @@ import {
   formatTime,
   fitsWithinBusinessHours,
   generateTimeSlots,
+  todayDateInputStr,
 } from "@/lib/utils";
 
 function slotStatus(spaceId, time, date, appointments, blocks, duration, business) {
@@ -98,7 +99,9 @@ function SlotCell({
         {mode === "admin" && onToggleBlock && (
           <button
             type="button"
-            onClick={() => onToggleBlock({ spaceId, time, block: false })}
+            onClick={() =>
+              onToggleBlock({ spaceId, time, block: false, blockId: block.id })
+            }
             className="mt-1 text-xs font-medium text-gray-700 hover:underline"
           >
             Habilitar
@@ -180,7 +183,7 @@ export default function DayCalendar({
         <input
           type="date"
           value={date}
-          min={new Date().toISOString().slice(0, 10)}
+          min={todayDateInputStr()}
           onChange={(e) => onDateChange(e.target.value)}
           className="input sm:max-w-xs"
         />

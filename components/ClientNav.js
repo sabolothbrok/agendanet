@@ -53,7 +53,7 @@ export default function ClientNav({
       </header>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white sm:hidden pb-[env(safe-area-inset-bottom)]"
+        className="client-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white md:hidden"
         aria-label="Navegación cliente"
       >
         <div className="grid grid-cols-2">
@@ -73,7 +73,7 @@ export default function ClientNav({
       </nav>
 
       {/* Desktop tabs */}
-      <div className="hidden border-b border-gray-200 bg-white sm:block">
+      <div className="hidden border-b border-gray-200 bg-white md:block">
         <div className="mx-auto flex max-w-5xl gap-1 px-4">
           {links.map(({ href, label, icon: Icon }) => (
             <Link

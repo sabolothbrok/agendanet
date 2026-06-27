@@ -3,6 +3,7 @@ import AdminCalendarClient from "@/components/AdminCalendarClient";
 import { getSession } from "@/lib/session";
 import { requireAdminSession } from "@/lib/auth";
 import { getCalendarData } from "@/lib/queries";
+import { todayDateInputStr } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function AdminCalendarPage({ params, searchParams }) {
   const auth = await requireAdminSession(session, slug);
   const { business } = auth;
 
-  const date = sp?.date || new Date().toISOString().slice(0, 10);
+  const date = sp?.date || todayDateInputStr();
   const calendarData = await getCalendarData(business.id, date);
 
   return (

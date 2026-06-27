@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getSession } from "@/lib/session";
 import { requireCustomerSession } from "@/lib/auth";
 import { getCalendarData, listServices } from "@/lib/queries";
+import { todayDateInputStr } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function ClientHomePage({ params, searchParams }) {
   const auth = await requireCustomerSession(session, slug);
   const { business, customer } = auth;
 
-  const date = sp?.date || new Date().toISOString().slice(0, 10);
+  const date = sp?.date || todayDateInputStr();
   const [calendarData, allServices] = await Promise.all([
     getCalendarData(business.id, date, { viewerCustomerId: customer.id }),
     listServices(business.id, { activeOnly: true }),

@@ -16,7 +16,7 @@ export default function ClientShell({ slug, businessName, customer, children, ma
         isPremium={customer.is_premium}
         current={pathname}
       />
-      <main className={mainClassName || "mx-auto max-w-5xl px-4 py-6 sm:py-8"}>
+      <main className={mainClassName || "mx-auto max-w-5xl px-3 py-4 md:px-4 md:py-8"}>
         {children}
       </main>
     </div>

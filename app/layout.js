@@ -12,6 +12,12 @@ export const metadata = {
   description: "Plataforma de citas para pequeños negocios",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
