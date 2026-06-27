@@ -21,7 +21,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full overflow-x-clip font-sans">
+      <body className="min-h-full overflow-x-hidden font-sans">
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

@@ -132,21 +132,22 @@ export default function BookingClient({
               {services.map((s) => (
                 <label
                   key={s.id}
-                  className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
+                  className="flex cursor-pointer flex-wrap items-start justify-between gap-x-3 gap-y-1 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
                 >
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 shrink-0"
-                    checked={selectedServices.includes(s.id)}
-                    onChange={() => toggleService(s.id)}
-                  />
-                  <span className="min-w-0 flex-1 break-words">
-                    {s.name}
-                    {s.is_premium && <PremiumBadge compact className="ml-1 align-middle" />}
+                  <span className="flex min-w-0 items-start gap-2">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 shrink-0"
+                      checked={selectedServices.includes(s.id)}
+                      onChange={() => toggleService(s.id)}
+                    />
+                    <span className="min-w-0 break-words">
+                      {s.name}
+                      {s.is_premium && <PremiumBadge compact className="ml-1 align-middle" />}
+                    </span>
                   </span>
-                  <span className="shrink-0 text-right text-xs text-gray-500 sm:text-sm">
-                    {s.duration_minutes} min
-                    <span className="hidden sm:inline"> · {formatOptionalPrice(s.price)}</span>
+                  <span className="shrink-0 text-right text-gray-500">
+                    {s.duration_minutes} min · {formatOptionalPrice(s.price)}
                   </span>
                 </label>
               ))}
