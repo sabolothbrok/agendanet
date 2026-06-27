@@ -7,43 +7,76 @@ import {
 } from "@/lib/queries";
 import { setSession, clearSession } from "@/lib/session";
 import { normalizePhone } from "@/lib/utils";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
+
+function loginErrorMessage(error) {
+  if (error instanceof Error && error.message.includes("DATABASE_URL")) {
+    return "Falta configurar la base de datos (DATABASE_URL).";
+  }
+  return "Error al iniciar sesión. Verifica tu conexión e intenta de nuevo.";
+}
 
 export async function universalLoginAction(formData) {
-  const phone = formData.get("phone");
-  const destination = formData.get("destination") || null;
-  const result = await resolveUniversalLogin(phone, destination);
-  if (result.error) return { error: result.error };
-  if (result.destinations) return { destinations: result.destinations };
+  try {
+    const phone = formData.get("phone");
+    const destinationRaw = formData.get("destination");
+    const destination = destinationRaw ? String(destinationRaw) : null;
+    const result = await resolveUniversalLogin(phone, destination);
+    if (result.error) return { error: result.error };
+    if (result.destinations) return { destinations: result.destinations };
+    if (!result.session) return { error: "No se pudo iniciar sesión." };
 
-  await setSession(result.session);
-  if (result.session.role === "platform_admin") redirect("/platform");
-  if (result.session.role === "admin") redirect(`/b/${result.session.businessSlug}/admin`);
-  redirect(`/b/${result.session.businessSlug}/app`);
+    await setSession(result.session);
+    if (result.session.role === "platform_admin") redirect("/platform");
+    if (result.session.role === "admin") redirect(`/b/${result.session.businessSlug}/admin`);
+    redirect(`/b/${result.session.businessSlug}/app`);
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error("universalLoginAction", error);
+    return { error: loginErrorMessage(error) };
+  }
 }
 
 export async function platformLoginAction(formData) {
-  const phone = formData.get("phone");
-  const result = await loginPlatformAdmin(phone);
-  if (result.error) return { error: result.error };
-  await setSession(result.session);
-  redirect("/platform");
+  try {
+    const phone = formData.get("phone");
+    const result = await loginPlatformAdmin(phone);
+    if (result.error) return { error: result.error };
+    await setSession(result.session);
+    redirect("/platform");
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error("platformLoginAction", error);
+    return { error: loginErrorMessage(error) };
+  }
 }
 
 export async function adminLoginAction(slug, formData) {
-  const phone = formData.get("phone");
-  const result = await loginAdmin(slug, phone);
-  if (result.error) return { error: result.error };
-  await setSession(result.session);
-  redirect(`/b/${slug}/admin`);
+  try {
+    const phone = formData.get("phone");
+    const result = await loginAdmin(slug, phone);
+    if (result.error) return { error: result.error };
+    await setSession(result.session);
+    redirect(`/b/${slug}/admin`);
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error("adminLoginAction", error);
+    return { error: loginErrorMessage(error) };
+  }
 }
 
 export async function customerLoginAction(slug, formData) {
-  const phone = formData.get("phone");
-  const result = await loginCustomer(slug, phone);
-  if (result.error) return { error: result.error };
-  await setSession(result.session);
-  redirect(`/b/${slug}/app`);
+  try {
+    const phone = formData.get("phone");
+    const result = await loginCustomer(slug, phone);
+    if (result.error) return { error: result.error };
+    await setSession(result.session);
+    redirect(`/b/${slug}/app`);
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error("customerLoginAction", error);
+    return { error: loginErrorMessage(error) };
+  }
 }
 
 export async function joinWithInviteAction(slug, token, formData) {

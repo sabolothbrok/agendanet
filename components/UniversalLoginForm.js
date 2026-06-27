@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { unstable_rethrow } from "next/navigation";
 import { Building2, Calendar, Phone, Shield, Smartphone } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 
@@ -27,15 +28,22 @@ export default function UniversalLoginForm({ action }) {
     setPhone(nextPhone);
 
     startTransition(async () => {
-      const res = await action(fd);
-      if (res?.error) {
-        setError(res.error);
-        toast.error(res.error);
-        return;
-      }
-      if (res?.destinations?.length) {
-        setDestinations(res.destinations);
-        setDestination(res.destinations[0].key);
+      try {
+        const res = await action(fd);
+        if (res?.error) {
+          setError(res.error);
+          toast.error(res.error);
+          return;
+        }
+        if (res?.destinations?.length) {
+          setDestinations(res.destinations);
+          setDestination(res.destinations[0].key);
+        }
+      } catch (error) {
+        unstable_rethrow(error);
+        const message = "No se pudo iniciar sesión. Intenta de nuevo.";
+        setError(message);
+        toast.error(message);
       }
     });
   }
@@ -87,6 +95,10 @@ export default function UniversalLoginForm({ action }) {
         </div>
 
         {destinations?.length > 0 && (
+          <input type="hidden" name="destination" value={destination} />
+        )}
+
+        {destinations?.length > 0 && (
           <fieldset className="auth-destinations">
             <legend className="auth-label">Elige dónde entrar</legend>
             <div className="auth-destination-list">
@@ -101,7 +113,6 @@ export default function UniversalLoginForm({ action }) {
                   >
                     <input
                       type="radio"
-                      name="destination"
                       value={item.key}
                       checked={selected}
                       onChange={() => setDestination(item.key)}

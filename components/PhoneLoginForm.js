@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { unstable_rethrow } from "next/navigation";
 
 export default function PhoneLoginForm({ slug, action, title, subtitle }) {
   const [isPending, startTransition] = useTransition();
@@ -11,8 +12,13 @@ export default function PhoneLoginForm({ slug, action, title, subtitle }) {
     setError("");
     const fd = new FormData(e.target);
     startTransition(async () => {
-      const res = slug !== undefined ? await action(slug, fd) : await action(fd);
-      if (res?.error) setError(res.error);
+      try {
+        const res = slug !== undefined ? await action(slug, fd) : await action(fd);
+        if (res?.error) setError(res.error);
+      } catch (err) {
+        unstable_rethrow(err);
+        setError("No se pudo iniciar sesión. Intenta de nuevo.");
+      }
     });
   }
 
