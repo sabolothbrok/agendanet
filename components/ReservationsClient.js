@@ -46,20 +46,20 @@ export default function ReservationsClient({ slug, appointments, business }) {
   function Card({ apt, showActions }) {
     return (
       <li className="card p-4 text-sm">
-        <div className="flex justify-between gap-4">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0">
             <p className="font-medium text-gray-900">{formatDateShort(apt.start_at)}</p>
-            <p className="text-gray-600">
+            <p className="text-gray-600 break-words">
               {formatTime(apt.start_at)} – {formatTime(apt.end_at)} · {apt.space_name}
             </p>
             {apt.services?.length > 0 && (
-              <p className="mt-1 text-gray-500">
+              <p className="mt-1 text-gray-500 break-words">
                 {apt.services.map((s) => s.name).join(", ")}
               </p>
             )}
           </div>
           <span
-            className={`badge h-fit ${
+            className={`badge shrink-0 self-start ${
               apt.status === "active" ? "badge-success" : "badge-neutral"
             }`}
           >

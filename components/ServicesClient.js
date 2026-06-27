@@ -5,6 +5,7 @@ import { adminDeleteService, adminSaveService } from "@/app/actions/admin";
 import { formatOptionalPrice } from "@/lib/utils";
 import { useConfirm } from "@/hooks/useConfirm";
 import { useToast } from "@/hooks/useToast";
+import PremiumBadge from "@/components/PremiumBadge";
 
 const emptyForm = {
   id: "",
@@ -222,14 +223,16 @@ export default function ServicesClient({ slug, services: initial }) {
         {services.map((s) => (
           <div key={s.id} className="card p-4">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-medium text-gray-900">{s.name}</p>
+              <div className="min-w-0">
+                <p className="font-medium text-gray-900">
+                  {s.name}
+                  {s.is_premium && <PremiumBadge compact className="ml-1.5 align-middle" />}
+                </p>
                 <p className="text-sm text-gray-500">
                   {s.duration_minutes} min · {formatOptionalPrice(s.price)}
                 </p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                {s.is_premium && <span className="badge badge-warning">Premium</span>}
                 <span className={`badge ${s.is_active ? "badge-success" : "badge-neutral"}`}>
                   {s.is_active ? "Activo" : "Inactivo"}
                 </span>
@@ -274,8 +277,10 @@ export default function ServicesClient({ slug, services: initial }) {
             {services.map((s) => (
               <tr key={s.id} className="border-b border-gray-100">
                 <td className="px-4 py-3">
-                  <p className="font-medium text-gray-900">{s.name}</p>
-                  {s.is_premium && <span className="badge badge-warning mt-1">Premium</span>}
+                  <p className="font-medium text-gray-900">
+                    {s.name}
+                    {s.is_premium && <PremiumBadge className="ml-1.5 align-middle" />}
+                  </p>
                 </td>
                 <td className="px-4 py-3 text-gray-600">{s.duration_minutes} min</td>
                 <td className="px-4 py-3 text-gray-600">{formatOptionalPrice(s.price)}</td>

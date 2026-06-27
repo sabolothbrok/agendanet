@@ -1,11 +1,38 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { unstable_rethrow } from "next/navigation";
+import { Calendar } from "lucide-react";
+import LoginFooter from "@/components/LoginFooter";
+import LoginSessionResume from "@/components/LoginSessionResume";
+import {
+  getSessionContinueHref,
+  getSessionContinueLabel,
+  getSessionContextLabel,
+} from "@/lib/login-session";
 
-export default function PhoneLoginForm({ slug, action, title, subtitle }) {
+export default function PhoneLoginForm({
+  slug,
+  action,
+  title,
+  subtitle,
+  formKey,
+  activeSession,
+  logoutHref,
+  businessName,
+  loggedOut,
+  expired,
+  showBrand = true,
+}) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+
+  const continueHref = activeSession ? getSessionContinueHref(activeSession) : null;
+  const continueLabel = activeSession ? getSessionContinueLabel(activeSession) : "Continuar";
+  const sessionContext = activeSession
+    ? getSessionContextLabel(activeSession, businessName || title)
+    : "";
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -23,27 +50,74 @@ export default function PhoneLoginForm({ slug, action, title, subtitle }) {
   }
 
   return (
-    <div className="card mx-auto max-w-md p-8">
-      <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-      <p className="mt-2 text-sm text-gray-600">{subtitle}</p>
-      {error && (
-        <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+    <div className="auth-card">
+      <header className="auth-card-header">
+        {showBrand && (
+          <Link href="/" className="auth-brand" aria-label="AgendaNet — inicio">
+            <span className="auth-brand-mark">
+              <Calendar className="h-5 w-5" aria-hidden />
+            </span>
+            <span className="auth-brand-name">AgendaNet</span>
+          </Link>
+        )}
+        <h1 className="auth-title">{activeSession ? "Sesión activa" : title}</h1>
+        <p className="auth-subtitle">
+          {activeSession
+            ? "Puedes continuar con esta cuenta o cerrar sesión para entrar con otra."
+            : subtitle}
+        </p>
+      </header>
+
+      {loggedOut && !activeSession && (
+        <p
+          className={`auth-notice ${expired ? "auth-notice-warn" : ""}`}
+          role="status"
+        >
+          {expired
+            ? "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
+            : "Sesión cerrada correctamente."}
+        </p>
       )}
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Teléfono</label>
-          <input
-            name="phone"
-            type="tel"
-            required
-            placeholder="8888-8888"
-            className="input"
-          />
-        </div>
-        <button type="submit" disabled={isPending} className="btn btn-primary w-full">
-          {isPending ? "Entrando..." : "Entrar"}
-        </button>
-      </form>
+
+      {activeSession ? (
+        <LoginSessionResume
+          name={activeSession.name}
+          phone={activeSession.phone}
+          context={sessionContext}
+          continueHref={continueHref}
+          continueLabel={continueLabel}
+          logoutHref={logoutHref}
+        />
+      ) : (
+        <>
+          {error && (
+            <p className="auth-error" role="alert">{error}</p>
+          )}
+
+          <form key={formKey} onSubmit={handleSubmit} className="auth-form">
+            <div>
+              <label htmlFor="phone-login" className="auth-label">Teléfono</label>
+              <input
+                id="phone-login"
+                name="phone"
+                type="tel"
+                required
+                autoComplete="tel"
+                placeholder="8888-8888"
+                className="input auth-input"
+              />
+            </div>
+            <p className="auth-hint">
+              Usa el teléfono registrado en este negocio (tuyo o de quien ya fue invitado).
+            </p>
+            <button type="submit" disabled={isPending} className="btn btn-primary auth-submit">
+              {isPending ? "Entrando..." : "Entrar"}
+            </button>
+          </form>
+        </>
+      )}
+
+      <LoginFooter />
     </div>
   );
 }

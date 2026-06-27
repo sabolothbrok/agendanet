@@ -11,18 +11,19 @@ import {
 } from "@/lib/utils";
 
 function slotStatus(spaceId, time, date, appointments, blocks, duration, business) {
+  const normalizedSpaceId = String(spaceId);
   const start = combineDateAndTime(date, time);
-  const end = addMinutes(start, duration);
+  const end = addMinutes(start, Number(duration) || 0);
 
   for (const apt of appointments) {
-    if (apt.space_id !== spaceId) continue;
+    if (String(apt.space_id) !== normalizedSpaceId) continue;
     if (start < new Date(apt.end_at) && new Date(apt.start_at) < end) {
       return { type: "booked", data: apt };
     }
   }
 
   for (const block of blocks) {
-    if (block.space_id !== spaceId) continue;
+    if (String(block.space_id) !== normalizedSpaceId) continue;
     if (start < new Date(block.end_at) && new Date(block.start_at) < end) {
       return { type: "blocked", data: block };
     }
@@ -196,7 +197,7 @@ export default function DayCalendar({
             <p className="mb-3 text-sm font-semibold text-gray-800">
               {formatTime(combineDateAndTime(date, time))}
             </p>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2">
               {spaces.map((sp) => {
                 const status = slotStatus(
                   sp.id,
@@ -208,9 +209,9 @@ export default function DayCalendar({
                   business
                 );
                 const isSelected =
-                  status.type === "available" &&
-                  selectedSlot?.spaceId === sp.id &&
-                  selectedSlot?.time === time;
+                  selectedSlot &&
+                  String(selectedSlot.spaceId) === String(sp.id) &&
+                  selectedSlot.time === time;
 
                 return (
                   <div key={sp.id} className="flex min-h-[52px] flex-col">
@@ -270,9 +271,9 @@ export default function DayCalendar({
                     business
                   );
                   const isSelected =
-                    status.type === "available" &&
-                    selectedSlot?.spaceId === sp.id &&
-                    selectedSlot?.time === time;
+                    selectedSlot &&
+                    String(selectedSlot.spaceId) === String(sp.id) &&
+                    selectedSlot.time === time;
 
                   return (
                     <td key={sp.id} className="h-px p-1 align-top">

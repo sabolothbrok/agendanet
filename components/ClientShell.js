@@ -7,7 +7,7 @@ export default function ClientShell({ slug, businessName, customer, children, ma
   const pathname = usePathname();
 
   return (
-    <div className="client-page min-h-screen bg-gray-50">
+    <div className="min-h-screen overflow-x-hidden bg-gray-50">
       <ClientNav
         slug={slug}
         businessName={businessName}
@@ -16,7 +16,9 @@ export default function ClientShell({ slug, businessName, customer, children, ma
         isPremium={customer.is_premium}
         current={pathname}
       />
-      <main className={mainClassName || "mx-auto max-w-5xl px-3 py-4 md:px-4 md:py-8"}>
+      <main
+        className={`page-main mx-auto w-full max-w-5xl min-w-0 overflow-x-hidden ${mainClassName || ""}`}
+      >
         {children}
       </main>
     </div>

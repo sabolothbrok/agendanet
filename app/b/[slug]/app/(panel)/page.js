@@ -34,7 +34,7 @@ export default async function ClientHomePage({ params, searchParams }) {
       <p className="mt-1 text-sm text-gray-600 sm:text-base">
         Elige un espacio disponible en el calendario
       </p>
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         <BookingClient
           slug={slug}
           business={business}

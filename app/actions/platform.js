@@ -11,6 +11,7 @@ import {
   updatePlatformAdmin,
 } from "@/lib/queries";
 import { getSession, setSession } from "@/lib/session";
+import { touchSessionTimestamps } from "@/lib/session-policy";
 import { isValidSlug, normalizePhone, slugify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -76,7 +77,7 @@ export async function platformUpdateProfile(formData) {
   await updatePlatformAdmin(auth.session.userId, { name });
 
   const session = await getSession();
-  await setSession({ ...session, name });
+  await setSession(touchSessionTimestamps({ ...session, name }));
 
   revalidatePath("/platform");
   revalidatePath("/platform/settings");

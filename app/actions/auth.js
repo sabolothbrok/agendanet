@@ -112,7 +112,11 @@ export async function joinWithInviteAction(slug, token, formData) {
 }
 
 export async function logoutAction(formData) {
-  const redirectTo = formData.get("redirectTo") || "/";
+  const redirectTo = String(formData.get("redirectTo") || "/");
   await clearSession();
-  redirect(redirectTo);
+
+  const base = redirectTo.split("?")[0];
+  const params = new URLSearchParams(redirectTo.includes("?") ? redirectTo.split("?")[1] : "");
+  params.set("loggedOut", "1");
+  redirect(`${base}?${params.toString()}`);
 }

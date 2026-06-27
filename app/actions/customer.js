@@ -19,6 +19,7 @@ import {
   formatTime,
   fitsWithinBusinessHours,
   isSlotBookable,
+  normalizeBusinessTime,
 } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -43,9 +44,7 @@ function businessFilterServices(business, serviceIds, allowed) {
   return serviceIds.filter((id) => allowed.some((s) => s.id === id));
 }
 
-async function isSlotFree(business, spaceId, startAt, endAt, dateStr, excludeId = null) {
-  const duration = (endAt - startAt) / 60_000;
-  const time = `${String(startAt.getHours()).padStart(2, "0")}:${String(startAt.getMinutes()).padStart(2, "0")}`;
+async function isSlotFree(business, spaceId, time, dateStr, duration, excludeId = null) {
   const { appointments, blocks } = await getCalendarData(business.id, dateStr);
 
   return isSlotBookable({
@@ -67,7 +66,7 @@ function validateBookingTimes(business, date, time, duration) {
 
   if (!fitsWithinBusinessHours(startAt, endAt, business.open_hour, business.close_hour, date)) {
     return {
-      error: `La reserva termina después del horario de cierre (${String(business.close_hour).slice(0, 5)}).`,
+      error: `La reserva termina después del horario de cierre (${normalizeBusinessTime(business.close_hour)}).`,
     };
   }
 
@@ -95,7 +94,7 @@ export async function customerBook(slug, formData) {
   if (times.error) return { error: times.error };
   const { startAt, endAt } = times;
 
-  const free = await isSlotFree(auth.business, spaceId, startAt, endAt, date);
+  const free = await isSlotFree(auth.business, spaceId, time, date, duration);
   if (!free) return { error: "Ese espacio ya no está disponible en ese horario." };
 
   const apt = await createAppointment({
@@ -210,9 +209,9 @@ export async function customerReschedule(slug, appointmentId, formData) {
   const free = await isSlotFree(
     auth.business,
     spaceId,
-    startAt,
-    endAt,
+    time,
     date,
+    duration,
     apt.id
   );
   if (!free) return { error: "Ese horario no está disponible." };

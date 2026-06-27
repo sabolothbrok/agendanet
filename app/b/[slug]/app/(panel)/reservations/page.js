@@ -15,16 +15,16 @@ export default async function ClientReservationsPage({ params }) {
   );
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <>
       <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Mis reservas</h1>
       <p className="mt-1 text-sm text-gray-600 sm:text-base">Activas primero, luego historial</p>
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         <ReservationsClient
           slug={slug}
           appointments={appointments}
           business={auth.business}
         />
       </div>
-    </div>
+    </>
   );
 }
