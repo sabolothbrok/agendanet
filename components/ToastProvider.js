@@ -1,7 +1,15 @@
 "use client";
 
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 const ToastContext = createContext(null);
 
@@ -12,21 +20,39 @@ const ICONS = {
 };
 
 export function ToastProvider({ children }) {
-  const [toasts, setToasts] = useState([]);
+  const [toast, setToast] = useState(null);
+  const timeoutRef = useRef(null);
 
-  const dismiss = useCallback((id) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  const clearDismissTimer = useCallback(() => {
+    if (timeoutRef.current !== null) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
   }, []);
+
+  const dismiss = useCallback(
+    (id) => {
+      setToast((current) => {
+        if (id != null && current?.id !== id) return current;
+        clearDismissTimer();
+        return null;
+      });
+    },
+    [clearDismissTimer]
+  );
 
   const show = useCallback(
     (message, type = "success") => {
       if (!message) return;
+      clearDismissTimer();
       const id = crypto.randomUUID();
-      setToasts((prev) => [...prev.slice(-2), { id, message, type }]);
-      window.setTimeout(() => dismiss(id), 3500);
+      setToast({ id, message, type });
+      timeoutRef.current = window.setTimeout(() => dismiss(id), 3500);
     },
-    [dismiss]
+    [clearDismissTimer, dismiss]
   );
+
+  useEffect(() => () => clearDismissTimer(), [clearDismissTimer]);
 
   const value = useMemo(
     () => ({
@@ -41,8 +67,8 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast-stack" aria-live="polite" aria-atomic="false">
-        {toasts.map((toast) => {
+      <div className="toast-stack" aria-live="polite" aria-atomic="true">
+        {toast && (() => {
           const Icon = ICONS[toast.type] || Info;
           return (
             <div key={toast.id} className={`toast toast-${toast.type}`} role="status">
@@ -58,7 +84,7 @@ export function ToastProvider({ children }) {
               </button>
             </div>
           );
-        })}
+        })()}
       </div>
     </ToastContext.Provider>
   );

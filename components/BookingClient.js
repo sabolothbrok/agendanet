@@ -13,6 +13,7 @@ import {
   formatDate,
   formatTime,
   isSlotBookable,
+  isSlotStartInPast,
 } from "@/lib/utils";
 import { formatOptionalPrice } from "@/lib/utils";
 
@@ -54,10 +55,13 @@ export default function BookingClient({
       })
     : false;
 
-  const validationMessage =
-    selectedSlot && !slotIsValid
-      ? "Ese horario ya no alcanza para la duración seleccionada."
-      : "";
+  const validationMessage = selectedSlot
+    ? isSlotStartInPast(date, selectedSlot.time)
+      ? "Ese horario ya pasó."
+      : !slotIsValid
+        ? "Ese horario ya no alcanza para la duración seleccionada."
+        : ""
+    : "";
 
   function handleSelectSlot(slot) {
     setError("");

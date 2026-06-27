@@ -8,10 +8,11 @@ import {
   formatTime,
   fitsWithinBusinessHours,
   generateTimeSlots,
+  isSlotStartInPast,
   todayDateInputStr,
 } from "@/lib/utils";
 
-function slotStatus(spaceId, time, date, appointments, blocks, duration, business) {
+function slotStatus(spaceId, time, date, appointments, blocks, duration, business, mode) {
   const normalizedSpaceId = String(spaceId);
   const start = combineDateAndTime(date, time);
   const end = addMinutes(start, Number(duration) || 0);
@@ -168,6 +169,10 @@ export default function DayCalendar({
     () => generateTimeSlots(openStr, closeStr, business.slot_minutes || 30),
     [openStr, closeStr, business.slot_minutes]
   );
+  const visibleSlots = useMemo(() => {
+    if (mode !== "customer") return slots;
+    return slots.filter((time) => !isSlotStartInPast(date, time));
+  }, [slots, mode, date]);
   const isDesktop = useMediaQuery("(min-width: 768px)", false);
 
   if (!spaces.length) {
@@ -195,10 +200,16 @@ export default function DayCalendar({
         />
       </div>
 
+      {mode === "customer" && visibleSlots.length === 0 ? (
+        <p className="text-sm text-gray-500">
+          No hay horarios disponibles para este día. Elige otra fecha.
+        </p>
+      ) : null}
+
       {/* Mobile: cards por hora (no renderizar tabla ancha en el DOM) */}
-      {!isDesktop && (
+      {!isDesktop && visibleSlots.length > 0 && (
       <div className="space-y-3">
-        {slots.map((time) => (
+        {visibleSlots.map((time) => (
           <div key={time} className="card p-3">
             <p className="mb-3 text-sm font-semibold text-gray-800">
               {formatTime(combineDateAndTime(date, time))}
@@ -212,7 +223,8 @@ export default function DayCalendar({
                   appointments,
                   blocks,
                   duration,
-                  business
+                  business,
+                  mode
                 );
                 const isSelected =
                   selectedSlot &&
@@ -247,7 +259,7 @@ export default function DayCalendar({
       )}
 
       {/* Desktop: tabla con scroll horizontal */}
-      {isDesktop && (
+      {isDesktop && visibleSlots.length > 0 && (
       <div className="scroll-table max-w-full rounded-lg border border-gray-200 bg-white">
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <thead>
@@ -263,7 +275,7 @@ export default function DayCalendar({
             </tr>
           </thead>
           <tbody>
-            {slots.map((time) => (
+            {visibleSlots.map((time) => (
               <tr key={time} className="border-b border-gray-100">
                 <td className="sticky left-0 z-10 bg-white px-3 py-2 text-gray-500 tabular-nums">
                   {formatTime(combineDateAndTime(date, time))}
@@ -276,7 +288,8 @@ export default function DayCalendar({
                     appointments,
                     blocks,
                     duration,
-                    business
+                    business,
+                    mode
                   );
                   const isSelected =
                     selectedSlot &&

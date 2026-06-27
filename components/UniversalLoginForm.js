@@ -7,6 +7,7 @@ import { Building2, Calendar, Phone, Shield, Smartphone } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import LoginFooter from "@/components/LoginFooter";
 import LoginSessionResume from "@/components/LoginSessionResume";
+import LoginStatusToast from "@/components/LoginStatusToast";
 import {
   getSessionContinueHref,
   getSessionContinueLabel,
@@ -85,16 +86,11 @@ export default function UniversalLoginForm({
         </p>
       </header>
 
-      {loggedOut && !activeSession && (
-        <p
-          className={`auth-notice ${expired ? "auth-notice-warn" : ""}`}
-          role="status"
-        >
-          {expired
-            ? "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
-            : "Sesión cerrada correctamente."}
-        </p>
-      )}
+      <LoginStatusToast
+        loggedOut={loggedOut}
+        expired={expired}
+        activeSession={activeSession}
+      />
 
       {activeSession ? (
         <LoginSessionResume

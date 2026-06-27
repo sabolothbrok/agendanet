@@ -19,6 +19,7 @@ import {
   formatTime,
   fitsWithinBusinessHours,
   isSlotBookable,
+  isSlotStartInPast,
   normalizeBusinessTime,
 } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
@@ -61,6 +62,10 @@ async function isSlotFree(business, spaceId, time, dateStr, duration, excludeId 
 }
 
 function validateBookingTimes(business, date, time, duration) {
+  if (isSlotStartInPast(date, time)) {
+    return { error: "Ese horario ya pasó." };
+  }
+
   const startAt = combineDateAndTime(date, time);
   const endAt = addMinutes(startAt, duration);
 
