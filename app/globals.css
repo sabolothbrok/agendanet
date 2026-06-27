@@ -53,6 +53,9 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .btn {
@@ -89,6 +92,9 @@ body {
 
 .input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   padding: 0.625rem 0.875rem;
@@ -171,12 +177,14 @@ body {
 .slot-cell {
   display: flex;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 52px;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
-  padding: 0.375rem 0.75rem;
+  padding: 0.375rem 0.5rem;
   font-size: 0.75rem;
   line-height: 1.25;
   text-align: center;
@@ -187,6 +195,33 @@ body {
   flex-direction: column;
   justify-content: center;
   gap: 0.125rem;
+}
+
+.slot-cell-stack p,
+.slot-cell {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Calendario: solo una vista según ancho (evita tabla ancha en móvil) */
+.calendar-mobile {
+  display: block;
+}
+
+.calendar-desktop {
+  display: none;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .calendar-mobile {
+    display: none;
+  }
+
+  .calendar-desktop {
+    display: block;
+  }
 }
 
 .btn-primary:disabled {

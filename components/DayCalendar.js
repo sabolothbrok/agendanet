@@ -5,6 +5,7 @@ import {
   addMinutes,
   combineDateAndTime,
   formatTime,
+  formatTimeSlot,
   fitsWithinBusinessHours,
   generateTimeSlots,
   todayDateInputStr,
@@ -73,7 +74,7 @@ function SlotCell({
           {label}
         </p>
         <p className="text-gray-500">
-          {formatTime(apt.start_at)} – {formatTime(apt.end_at)}
+          {formatTimeSlot(apt.start_at)}–{formatTimeSlot(apt.end_at)}
         </p>
         {mode === "admin" && onCancelAppointment && (
           <button
@@ -95,7 +96,7 @@ function SlotCell({
       <div className="slot-cell slot-blocked slot-cell-stack h-full">
         <p className="font-medium text-gray-700">No disponible</p>
         <p className="text-gray-500">
-          {formatTime(block.start_at)} – {formatTime(block.end_at)}
+          {formatTimeSlot(block.start_at)}–{formatTimeSlot(block.end_at)}
         </p>
         {mode === "admin" && onToggleBlock && (
           <button
@@ -120,7 +121,7 @@ function SlotCell({
       <div className="slot-cell slot-unavailable slot-cell-stack h-full">
         <p className="font-medium text-gray-500">Fuera de horario</p>
         <p className="text-gray-400">
-          {formatTime(start)} – {formatTime(end)}
+          {formatTimeSlot(start)}–{formatTimeSlot(end)}
         </p>
       </div>
     );
@@ -186,16 +187,16 @@ export default function DayCalendar({
           value={date}
           min={todayDateInputStr()}
           onChange={(e) => onDateChange(e.target.value)}
-          className="input sm:max-w-xs"
+          className="input w-full min-w-0 max-w-full sm:max-w-xs"
         />
       </div>
 
       {/* Mobile: cards por hora */}
-      <div className="space-y-3 md:hidden">
+      <div className="calendar-mobile min-w-0 space-y-3">
         {slots.map((time) => (
-          <div key={time} className="card p-3">
+          <div key={time} className="card min-w-0 p-3">
             <p className="mb-3 text-sm font-semibold text-gray-800">
-              {formatTime(combineDateAndTime(date, time))}
+              {formatTimeSlot(combineDateAndTime(date, time))}
             </p>
             <div className="grid grid-cols-1 gap-2">
               {spaces.map((sp) => {
@@ -214,10 +215,9 @@ export default function DayCalendar({
                   selectedSlot.time === time;
 
                 return (
-                  <div key={sp.id} className="flex min-h-[52px] flex-col">
-                    <p className="mb-1 shrink-0 text-xs font-medium text-gray-500">{sp.name}</p>
-                    <div className="flex w-full flex-1">
-                      <SlotCell
+                  <div key={sp.id} className="min-w-0">
+                    <p className="mb-1 truncate text-xs font-medium text-gray-500">{sp.name}</p>
+                    <SlotCell
                         mode={mode}
                         status={status}
                         isSelected={isSelected}
@@ -230,7 +230,6 @@ export default function DayCalendar({
                         onToggleBlock={onToggleBlock}
                         onCancelAppointment={onCancelAppointment}
                       />
-                    </div>
                   </div>
                 );
               })}
@@ -240,7 +239,7 @@ export default function DayCalendar({
       </div>
 
       {/* Desktop: tabla con scroll horizontal */}
-      <div className="scroll-table hidden max-w-full rounded-lg border border-gray-200 bg-white md:block">
+      <div className="calendar-desktop scroll-table rounded-lg border border-gray-200 bg-white">
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
