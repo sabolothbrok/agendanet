@@ -4,10 +4,8 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { unstable_rethrow } from "next/navigation";
 import { Calendar } from "lucide-react";
-import { useToast } from "@/hooks/useToast";
 import LoginFooter from "@/components/LoginFooter";
 import LoginSessionResume from "@/components/LoginSessionResume";
-import LoginStatusToast from "@/components/LoginStatusToast";
 import {
   getSessionContinueHref,
   getSessionContinueLabel,
@@ -29,7 +27,6 @@ export default function PhoneLoginForm({
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
-  const toast = useToast();
 
   const continueHref = activeSession ? getSessionContinueHref(activeSession) : null;
   const continueLabel = activeSession ? getSessionContinueLabel(activeSession) : "Continuar";
@@ -46,13 +43,10 @@ export default function PhoneLoginForm({
         const res = slug !== undefined ? await action(slug, fd) : await action(fd);
         if (res?.error) {
           setError(res.error);
-          toast.error(res.error);
         }
       } catch (err) {
         unstable_rethrow(err);
-        const message = "No se pudo iniciar sesión. Intenta de nuevo.";
-        setError(message);
-        toast.error(message);
+        setError("No se pudo iniciar sesión. Intenta de nuevo.");
       }
     });
   }
@@ -76,11 +70,16 @@ export default function PhoneLoginForm({
         </p>
       </header>
 
-      <LoginStatusToast
-        loggedOut={loggedOut}
-        expired={expired}
-        activeSession={activeSession}
-      />
+      {loggedOut && !activeSession && (
+        <p
+          className={`auth-notice ${expired ? "auth-notice-warn" : ""}`}
+          role="status"
+        >
+          {expired
+            ? "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
+            : "Sesión cerrada correctamente."}
+        </p>
+      )}
 
       {activeSession ? (
         <LoginSessionResume

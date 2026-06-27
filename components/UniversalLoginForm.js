@@ -4,10 +4,8 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { unstable_rethrow } from "next/navigation";
 import { Building2, Calendar, Phone, Shield, Smartphone } from "lucide-react";
-import { useToast } from "@/hooks/useToast";
 import LoginFooter from "@/components/LoginFooter";
 import LoginSessionResume from "@/components/LoginSessionResume";
-import LoginStatusToast from "@/components/LoginStatusToast";
 import {
   getSessionContinueHref,
   getSessionContinueLabel,
@@ -30,7 +28,6 @@ export default function UniversalLoginForm({
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
-  const toast = useToast();
   const [phone, setPhone] = useState("");
   const [destinations, setDestinations] = useState(null);
   const [destination, setDestination] = useState("");
@@ -51,7 +48,6 @@ export default function UniversalLoginForm({
         const res = await action(fd);
         if (res?.error) {
           setError(res.error);
-          toast.error(res.error);
           return;
         }
         if (res?.destinations?.length) {
@@ -60,9 +56,7 @@ export default function UniversalLoginForm({
         }
       } catch (err) {
         unstable_rethrow(err);
-        const message = "No se pudo iniciar sesión. Intenta de nuevo.";
-        setError(message);
-        toast.error(message);
+        setError("No se pudo iniciar sesión. Intenta de nuevo.");
       }
     });
   }
@@ -86,11 +80,16 @@ export default function UniversalLoginForm({
         </p>
       </header>
 
-      <LoginStatusToast
-        loggedOut={loggedOut}
-        expired={expired}
-        activeSession={activeSession}
-      />
+      {loggedOut && !activeSession && (
+        <p
+          className={`auth-notice ${expired ? "auth-notice-warn" : ""}`}
+          role="status"
+        >
+          {expired
+            ? "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
+            : "Sesión cerrada correctamente."}
+        </p>
+      )}
 
       {activeSession ? (
         <LoginSessionResume
