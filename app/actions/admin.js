@@ -1,5 +1,6 @@
 "use server";
 
+import { getAppUrl } from "@/lib/env";
 import { requireAdminSession } from "@/lib/auth";
 import {
   cancelAppointment,
@@ -95,7 +96,7 @@ export async function adminGenerateInvite(slug) {
   if (auth.error) return { error: "No autorizado" };
 
   const invite = await createInviteLink(auth.business.id);
-  const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const base = getAppUrl();
   return {
     link: `${base}/b/${slug}/join?token=${invite.token}`,
     expiresAt: invite.expiresAt,

@@ -10,8 +10,8 @@ import { normalizePhone } from "@/lib/utils";
 import { redirect, unstable_rethrow } from "next/navigation";
 
 function loginErrorMessage(error) {
-  if (error instanceof Error && error.message.includes("DATABASE_URL")) {
-    return "Falta configurar la base de datos (DATABASE_URL).";
+  if (error instanceof Error && error.message.includes("Falta DATABASE_URL")) {
+    return error.message;
   }
   return "Error al iniciar sesión. Verifica tu conexión e intenta de nuevo.";
 }

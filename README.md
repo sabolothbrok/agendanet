@@ -22,6 +22,27 @@ npm run dev
 
 Abre http://localhost:3000
 
+## Deploy en Vercel
+
+1. **Neon** — crea un proyecto en [neon.tech](https://neon.tech) y copia el connection string (**Pooled**, con `?sslmode=require`).
+
+2. **Vercel** — importa el repo → **Settings → Environment Variables**:
+   - `DATABASE_URL` = tu connection string de Neon
+   - Actívala en **Production**, **Preview** y **Development**
+   - (Opcional) `NEXT_PUBLIC_APP_URL` = `https://tu-proyecto.vercel.app`
+
+   También puedes usar la integración **Neon** en el marketplace de Vercel; agrega `DATABASE_URL` sola.
+
+3. **Schema en producción** — una sola vez, desde tu PC (usa el mismo `DATABASE_URL` de producción):
+
+   ```bash
+   DATABASE_URL="postgresql://..." npm run db:setup
+   ```
+
+4. **Deploy** — push a `main` o **Redeploy** en Vercel si ya agregaste las variables.
+
+5. Prueba login en `https://tu-proyecto.vercel.app/login` con los teléfonos demo.
+
 ## Demo
 
 | Rol | URL | Teléfono |
