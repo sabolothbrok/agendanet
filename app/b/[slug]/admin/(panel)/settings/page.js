@@ -23,7 +23,7 @@ export default async function AdminSettingsPage({ params }) {
     >
       <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Configuración</h1>
       <p className="mt-1 text-sm text-gray-600 sm:text-base">
-        Estaciones, reglas de citas y notificaciones internas
+        Horario, estaciones, reglas de citas y notificaciones internas
       </p>
 
       <div className="mt-6 max-w-xl">

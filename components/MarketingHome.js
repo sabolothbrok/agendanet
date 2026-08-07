@@ -240,7 +240,7 @@ function PhonePreview() {
                 <div className="landing-phone-slot-item">
                   <p className="landing-phone-station">Estación 2</p>
                   <div className="slot-cell slot-blocked slot-cell-stack landing-slot-mini">
-                    <p className="font-medium text-gray-700">No disponible</p>
+                    <p className="font-medium text-rose-900">No Disponible</p>
                   </div>
                 </div>
               </div>

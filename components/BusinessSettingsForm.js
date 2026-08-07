@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { adminSaveSettings } from "@/app/actions/admin";
 import { useToast } from "@/hooks/useToast";
+import { normalizeBusinessTime } from "@/lib/utils";
 
 function Toggle({ name, label, defaultChecked }) {
   return (
@@ -14,6 +16,7 @@ function Toggle({ name, label, defaultChecked }) {
 }
 
 export default function BusinessSettingsForm({ slug, business }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
 
@@ -27,11 +30,55 @@ export default function BusinessSettingsForm({ slug, business }) {
         return;
       }
       toast.success("Configuración guardada.");
+      router.refresh();
     });
   }
 
+  const openHour = normalizeBusinessTime(business.open_hour) || "09:00";
+  const closeHour = normalizeBusinessTime(business.close_hour) || "18:00";
+  const slotMinutes = Number(business.slot_minutes) || 30;
+
   return (
     <form onSubmit={handleSubmit} className="mt-6 max-w-xl space-y-6">
+      <div className="card space-y-4 p-4 sm:p-6">
+        <h2 className="font-semibold text-gray-900">Horario</h2>
+        <p className="text-sm text-gray-600">
+          Define el horario de atención. El calendario de admin y clientes se ajusta a estas horas.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm text-gray-600">Apertura</label>
+            <input
+              name="open_hour"
+              type="time"
+              required
+              defaultValue={openHour}
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-gray-600">Cierre</label>
+            <input
+              name="close_hour"
+              type="time"
+              required
+              defaultValue={closeHour}
+              className="input"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-gray-600">
+            Intervalo del calendario (minutos)
+          </label>
+          <select name="slot_minutes" defaultValue={String(slotMinutes)} className="input">
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="60">60</option>
+          </select>
+        </div>
+      </div>
+
       <div className="card space-y-4 p-4 sm:p-6">
         <h2 className="font-semibold text-gray-900">Citas</h2>
         <div>

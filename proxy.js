@@ -75,7 +75,7 @@ function requireAuth(request, session, loginPath, isAuthorized) {
   return response;
 }
 
-export function middleware(request) {
+export function proxy(request) {
   const { pathname } = request.nextUrl;
   const session = parseSession(request);
 

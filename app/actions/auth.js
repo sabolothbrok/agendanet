@@ -3,6 +3,7 @@
 import { loginAdmin, loginCustomer, loginPlatformAdmin, resolveUniversalLogin } from "@/lib/auth";
 import {
   createCustomer,
+  getCustomerByPhone,
   getInviteByToken,
 } from "@/lib/queries";
 import { setSession, clearSession } from "@/lib/session";
@@ -92,6 +93,14 @@ export async function joinWithInviteAction(slug, token, formData) {
     return { error: "Ingresa un teléfono válido." };
   }
   if (!name) return { error: "Ingresa tu nombre." };
+
+  const existing = await getCustomerByPhone(invite.business_id, phone);
+  if (existing) {
+    return {
+      error:
+        "Ya existe una cuenta con este teléfono. Inicia sesión en lugar de crear una nueva.",
+    };
+  }
 
   const customer = await createCustomer({
     businessId: invite.business_id,

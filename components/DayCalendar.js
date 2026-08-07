@@ -98,8 +98,8 @@ function SlotCell({
 
     return (
       <div className="slot-cell slot-blocked slot-cell-stack h-full">
-        <p className="font-medium text-gray-700">No disponible</p>
-        <p className="text-gray-500">
+        <p className="font-medium text-rose-900">No Disponible</p>
+        <p className="text-rose-700/80">
           {formatTime(block.start_at)} – {formatTime(block.end_at)}
         </p>
         {mode === "admin" && onToggleBlock && (
@@ -108,7 +108,7 @@ function SlotCell({
             onClick={() =>
               onToggleBlock({ spaceId, time, block: false, blockId: block.id })
             }
-            className="mt-1 text-xs font-medium text-gray-700 hover:underline"
+            className="mt-1 text-xs font-medium text-rose-900 hover:underline"
           >
             Habilitar
           </button>
@@ -145,7 +145,7 @@ function SlotCell({
         isSelected ? "slot-selected" : "slot-available"
       }`}
     >
-      {mode === "admin" && !onSelectSlot ? "Marcar no disp." : "Disponible"}
+      Disponible
     </button>
   );
 }

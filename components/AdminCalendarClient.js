@@ -47,7 +47,7 @@ export default function AdminCalendarClient({ slug, business, date, calendarData
               space_id: payload.spaceId,
               start_at: startAt.toISOString(),
               end_at: endAt.toISOString(),
-              reason: "No disponible",
+              reason: "No Disponible",
             },
           ],
         };

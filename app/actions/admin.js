@@ -18,6 +18,7 @@ import {
   markNotificationRead,
   toggleCustomerPremium,
   updateBusinessSettings,
+  updateBusinessSchedule,
   upsertService,
   deleteService,
   getTodayAppointments,
@@ -25,7 +26,7 @@ import {
   updateSpaceName,
 } from "@/lib/queries";
 import { getSession } from "@/lib/session";
-import { formatDateShort, formatTime } from "@/lib/utils";
+import { formatDateShort, formatTime, normalizeBusinessTime, parseBusinessMinutes } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
 async function guard(slug) {
@@ -83,7 +84,7 @@ export async function adminToggleBlock(slug, { spaceId, date, time, duration, bl
         overlaps(startAt, endAt, new Date(b.start_at), new Date(b.end_at))
     );
     if (!alreadyBlocked) {
-      await createSpaceBlock({ spaceId, startAt, endAt, reason: "No disponible" });
+      await createSpaceBlock({ spaceId, startAt, endAt, reason: "No Disponible" });
     }
   } else if (blockId) {
     await deleteSpaceBlock(blockId, auth.business.id);
@@ -163,18 +164,60 @@ export async function adminSaveSettings(slug, formData) {
   const auth = await guard(slug);
   if (auth.error) return { error: "No autorizado" };
 
+  const openHour = normalizeBusinessTime(formData.get("open_hour") || "");
+  const closeHour = normalizeBusinessTime(formData.get("close_hour") || "");
+  const slotMinutes = Number(formData.get("slot_minutes"));
+
+  if (!/^\d{2}:\d{2}$/.test(openHour) || !/^\d{2}:\d{2}$/.test(closeHour)) {
+    return { error: "Ingresa un horario de apertura y cierre válido." };
+  }
+
+  const openMinutes = parseBusinessMinutes(openHour);
+  const closeMinutes = parseBusinessMinutes(closeHour);
+  if (!(closeMinutes > openMinutes)) {
+    return { error: "La hora de cierre debe ser posterior a la de apertura." };
+  }
+
+  if (![15, 30, 60].includes(slotMinutes)) {
+    return { error: "El intervalo del calendario debe ser 15, 30 o 60 minutos." };
+  }
+
+  const minModifyHours = Number(formData.get("min_modify_hours"));
+  const minAppointmentMinutes = Number(formData.get("min_appointment_minutes"));
+  const notifyInactiveDays = Number(formData.get("notify_inactive_days"));
+
+  if (!Number.isFinite(minModifyHours) || minModifyHours < 0) {
+    return { error: "Las horas mínimas para modificar deben ser un número válido." };
+  }
+  if (!Number.isFinite(minAppointmentMinutes) || minAppointmentMinutes < 15) {
+    return { error: "La duración mínima de cita debe ser al menos 15 minutos." };
+  }
+  if (!Number.isFinite(notifyInactiveDays) || notifyInactiveDays < 1) {
+    return { error: "Los días sin cita para avisar deben ser al menos 1." };
+  }
+
+  await updateBusinessSchedule(auth.business.id, {
+    openHour,
+    closeHour,
+    slotMinutes,
+  });
+
   await updateBusinessSettings(auth.business.id, {
-    min_modify_hours: Number(formData.get("min_modify_hours")),
-    min_appointment_minutes: Number(formData.get("min_appointment_minutes")),
+    min_modify_hours: minModifyHours,
+    min_appointment_minutes: minAppointmentMinutes,
     show_services_list: formData.get("show_services_list") === "on",
     reminders_enabled: formData.get("reminders_enabled") === "on",
     notify_inactive_enabled: formData.get("notify_inactive_enabled") === "on",
-    notify_inactive_days: Number(formData.get("notify_inactive_days")),
+    notify_inactive_days: notifyInactiveDays,
     notify_new_booking: formData.get("notify_new_booking") === "on",
     notify_cancel_booking: formData.get("notify_cancel_booking") === "on",
   });
 
   revalidatePath(`/b/${slug}/admin/settings`);
+  revalidatePath(`/b/${slug}/admin/calendar`);
+  revalidatePath(`/b/${slug}/admin`);
+  revalidatePath(`/b/${slug}/admin/reports`);
+  revalidatePath(`/b/${slug}/app`);
   return { success: true };
 }
 

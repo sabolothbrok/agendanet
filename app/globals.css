@@ -174,12 +174,13 @@ body {
 .slot-blocked {
   background: repeating-linear-gradient(
     -45deg,
-    #f9fafb,
-    #f9fafb 6px,
-    #eceff3 6px,
-    #eceff3 12px
+    #fff1f2,
+    #fff1f2 6px,
+    #ffe4e6 6px,
+    #ffe4e6 12px
   );
-  border: 1px solid #d1d5db;
+  border: 1px solid #fda4af;
+  color: #9f1239;
   cursor: default;
 }
 .slot-unavailable { background: #f3f4f6; border: 1px solid #e5e7eb; color: #9ca3af; cursor: default; }
