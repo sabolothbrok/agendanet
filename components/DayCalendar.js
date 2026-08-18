@@ -10,19 +10,49 @@ import {
   generateTimeSlots,
   isSlotStartInPast,
   todayDateInputStr,
+  tomorrowDateInputStr,
 } from "@/lib/utils";
 
-function slotStatus(spaceId, time, date, appointments, blocks, duration, business, mode) {
+function overlappingAppointments(spaceId, time, date, appointments, duration) {
   const normalizedSpaceId = String(spaceId);
   const start = combineDateAndTime(date, time);
   const end = addMinutes(start, Number(duration) || 0);
+  return appointments.filter((apt) => {
+    if (String(apt.space_id) !== normalizedSpaceId) return false;
+    return start < new Date(apt.end_at) && new Date(apt.start_at) < end;
+  });
+}
 
-  for (const apt of appointments) {
-    if (String(apt.space_id) !== normalizedSpaceId) continue;
-    if (start < new Date(apt.end_at) && new Date(apt.start_at) < end) {
-      return { type: "booked", data: apt };
+function slotStatus(spaceId, time, date, appointments, blocks, duration, business, mode, currentCustomerId) {
+  const overlapping = overlappingAppointments(spaceId, time, date, appointments, duration);
+  const active = overlapping.filter((apt) => apt.status !== "pending");
+  const pending = overlapping.filter((apt) => apt.status === "pending");
+
+  if (mode === "admin") {
+    if (active.length > 0) {
+      return { type: "booked", data: active[0] };
+    }
+    if (pending.length > 0) {
+      return { type: "pending_requests", data: pending };
+    }
+  } else {
+    const ownActive = active.find(
+      (apt) => apt.is_mine || apt.customer_id === currentCustomerId
+    );
+    if (ownActive || active.length > 0) {
+      return { type: "booked", data: ownActive || active[0] };
+    }
+    const ownPending = pending.find(
+      (apt) => apt.is_mine || apt.customer_id === currentCustomerId
+    );
+    if (ownPending) {
+      return { type: "pending_own", data: ownPending };
     }
   }
+
+  const normalizedSpaceId = String(spaceId);
+  const start = combineDateAndTime(date, time);
+  const end = addMinutes(start, Number(duration) || 0);
 
   for (const block of blocks) {
     if (String(block.space_id) !== normalizedSpaceId) continue;
@@ -53,6 +83,7 @@ function SlotCell({
   onSelectSlot,
   onToggleBlock,
   onCancelAppointment,
+  onOpenPending,
 }) {
   if (status.type === "booked") {
     const apt = status.data;
@@ -89,6 +120,34 @@ function SlotCell({
             Cancelar
           </button>
         )}
+      </div>
+    );
+  }
+
+  if (status.type === "pending_requests") {
+    const count = status.data.length;
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenPending?.(status.data)}
+        className="slot-cell slot-cell-stack slot-pending h-full"
+      >
+        <p className="font-medium text-amber-950">
+          {count} {count === 1 ? "solicitud" : "solicitudes"}
+        </p>
+        <p className="text-amber-800/80">Pendiente de aprobación</p>
+      </button>
+    );
+  }
+
+  if (status.type === "pending_own") {
+    const apt = status.data;
+    return (
+      <div className="slot-cell slot-cell-stack slot-pending h-full">
+        <p className="font-medium text-amber-950">Solicitud pendiente</p>
+        <p className="text-amber-800/80">
+          {formatTime(apt.start_at)} – {formatTime(apt.end_at)}
+        </p>
       </div>
     );
   }
@@ -161,6 +220,7 @@ export default function DayCalendar({
   onSelectSlot,
   onToggleBlock,
   onCancelAppointment,
+  onOpenPending,
   selectedSlot,
   slotDuration,
   currentCustomerId,
@@ -177,6 +237,7 @@ export default function DayCalendar({
     return slots.filter((time) => !isSlotStartInPast(date, time));
   }, [slots, mode, date]);
   const isDesktop = useMediaQuery("(min-width: 768px)", false);
+  const isToday = date === todayDateInputStr();
 
   if (!spaces.length) {
     return (
@@ -204,9 +265,30 @@ export default function DayCalendar({
       </div>
 
       {mode === "customer" && visibleSlots.length === 0 ? (
-        <p className="text-sm text-gray-500">
-          No hay horarios disponibles para este día. Elige otra fecha.
-        </p>
+        <div className="card space-y-3 p-4 text-sm text-gray-600 sm:p-5">
+          {isToday ? (
+            <>
+              <p className="font-medium text-gray-900">
+                No hay más horarios disponibles para hoy
+              </p>
+              <p>
+                El horario de atención de hoy ya finalizó o no quedan espacios disponibles.
+                Te invitamos a consultar la disponibilidad de mañana u otra fecha.
+              </p>
+              <button
+                type="button"
+                onClick={() => onDateChange(tomorrowDateInputStr())}
+                className="btn btn-secondary text-sm"
+              >
+                Ver disponibilidad de mañana
+              </button>
+            </>
+          ) : (
+            <p>
+              No hay horarios disponibles para este día. Elige otra fecha en el calendario.
+            </p>
+          )}
+        </div>
       ) : null}
 
       {/* Mobile: cards por hora (no renderizar tabla ancha en el DOM) */}
@@ -227,7 +309,8 @@ export default function DayCalendar({
                   blocks,
                   duration,
                   business,
-                  mode
+                  mode,
+                  currentCustomerId
                 );
                 const isSelected =
                   selectedSlot &&
@@ -250,6 +333,7 @@ export default function DayCalendar({
                         onSelectSlot={onSelectSlot}
                         onToggleBlock={onToggleBlock}
                         onCancelAppointment={onCancelAppointment}
+                        onOpenPending={onOpenPending}
                       />
                     </div>
                   </div>
@@ -292,7 +376,8 @@ export default function DayCalendar({
                     blocks,
                     duration,
                     business,
-                    mode
+                    mode,
+                    currentCustomerId
                   );
                   const isSelected =
                     selectedSlot &&
@@ -313,6 +398,7 @@ export default function DayCalendar({
                         onSelectSlot={onSelectSlot}
                         onToggleBlock={onToggleBlock}
                         onCancelAppointment={onCancelAppointment}
+                        onOpenPending={onOpenPending}
                       />
                     </td>
                   );

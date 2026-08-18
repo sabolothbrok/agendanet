@@ -24,9 +24,13 @@ import {
   getTodayAppointments,
   syncSpaceCount,
   updateSpaceName,
+  approveAppointment,
+  rejectAppointment,
+  notifyCustomersRejected,
 } from "@/lib/queries";
 import { getSession } from "@/lib/session";
 import { formatDateShort, formatTime, normalizeBusinessTime, parseBusinessMinutes } from "@/lib/utils";
+import { BOOKING_REJECTED_TITLE, BOOKING_REJECTED_BODY } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
 
 async function guard(slug) {
@@ -211,6 +215,7 @@ export async function adminSaveSettings(slug, formData) {
     notify_inactive_days: notifyInactiveDays,
     notify_new_booking: formData.get("notify_new_booking") === "on",
     notify_cancel_booking: formData.get("notify_cancel_booking") === "on",
+    require_booking_approval: formData.get("require_booking_approval") === "on",
   });
 
   revalidatePath(`/b/${slug}/admin/settings`);
@@ -257,5 +262,53 @@ export async function adminMarkRead(slug, formData) {
   const notificationId = formData.get("notificationId");
   await markNotificationRead(notificationId, "admin", auth.adminUserId);
   revalidatePath(`/b/${slug}/admin`);
+  return { success: true };
+}
+
+export async function adminApproveAppointment(slug, appointmentId) {
+  const auth = await guard(slug);
+  if (auth.error) return { error: "No autorizado" };
+
+  const result = await approveAppointment(appointmentId, auth.business.id);
+  if (result.error) return { error: result.error };
+
+  const apt = result.appointment;
+  await createNotification({
+    businessId: auth.business.id,
+    recipientRole: "customer",
+    recipientId: apt.customer_id,
+    type: "booking",
+    title: "Reserva confirmada",
+    body: `Cita el ${formatDateShort(apt.start_at)} de ${formatTime(apt.start_at)} a ${formatTime(apt.end_at)}.`,
+  });
+  await notifyCustomersRejected(auth.business.id, result.rejected || []);
+
+  revalidatePath(`/b/${slug}/admin`);
+  revalidatePath(`/b/${slug}/admin/calendar`);
+  revalidatePath(`/b/${slug}/app`);
+  revalidatePath(`/b/${slug}/app/reservations`);
+  return { success: true, rejectedCount: (result.rejected || []).length };
+}
+
+export async function adminRejectAppointment(slug, appointmentId) {
+  const auth = await guard(slug);
+  if (auth.error) return { error: "No autorizado" };
+
+  const apt = await rejectAppointment(appointmentId, auth.business.id);
+  if (!apt) return { error: "La solicitud ya no está pendiente." };
+
+  await createNotification({
+    businessId: auth.business.id,
+    recipientRole: "customer",
+    recipientId: apt.customer_id,
+    type: "booking",
+    title: BOOKING_REJECTED_TITLE,
+    body: BOOKING_REJECTED_BODY,
+  });
+
+  revalidatePath(`/b/${slug}/admin`);
+  revalidatePath(`/b/${slug}/admin/calendar`);
+  revalidatePath(`/b/${slug}/app`);
+  revalidatePath(`/b/${slug}/app/reservations`);
   return { success: true };
 }

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import DayCalendar from "@/components/DayCalendar";
+import PendingRequestsList from "@/components/PendingRequestsList";
 import { adminToggleBlock, adminCancelAppointment } from "@/app/actions/admin";
 import { useConfirm } from "@/hooks/useConfirm";
 import { useToast } from "@/hooks/useToast";
@@ -14,9 +15,11 @@ export default function AdminCalendarClient({ slug, business, date, calendarData
   const { confirm, dialog } = useConfirm();
   const toast = useToast();
   const [data, setData] = useState(calendarData);
+  const [pendingSlot, setPendingSlot] = useState(null);
 
   useEffect(() => {
     setData(calendarData);
+    setPendingSlot(null);
   }, [calendarData]);
 
   function refresh() {
@@ -111,10 +114,36 @@ export default function AdminCalendarClient({ slug, business, date, calendarData
         onDateChange={(d) => router.push(`?date=${d}`)}
         onToggleBlock={handleToggleBlock}
         onCancelAppointment={handleCancel}
+        onOpenPending={setPendingSlot}
         slotDuration={business.min_appointment_minutes}
       />
+      {pendingSlot?.length > 0 && (
+        <div className="card mt-4 p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="font-semibold text-gray-900">Solicitudes de este horario</h2>
+            <button
+              type="button"
+              className="btn btn-secondary text-xs"
+              onClick={() => setPendingSlot(null)}
+            >
+              Cerrar
+            </button>
+          </div>
+          <div className="mt-4">
+            <PendingRequestsList
+              slug={slug}
+              appointments={pendingSlot}
+              onResolved={() => {
+                setPendingSlot(null);
+                refresh();
+              }}
+            />
+          </div>
+        </div>
+      )}
       <p className="mt-4 text-sm text-gray-500">
-        Click en disponible = marcar no disponible. En reservas puedes cancelar.
+        Click en disponible = marcar no disponible. En reservas puedes cancelar. Las
+        solicitudes pendientes aparecen en ámbar; al aprobar una, el espacio queda ocupado.
       </p>
     </div>
   );

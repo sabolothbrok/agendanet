@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS business_settings (
   notify_inactive_days INTEGER NOT NULL DEFAULT 30,
   notify_new_booking BOOLEAN NOT NULL DEFAULT TRUE,
   notify_cancel_booking BOOLEAN NOT NULL DEFAULT TRUE,
+  require_booking_approval BOOLEAN NOT NULL DEFAULT FALSE,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -114,8 +115,8 @@ CREATE TABLE IF NOT EXISTS appointments (
   space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
   start_at TIMESTAMPTZ NOT NULL,
   end_at TIMESTAMPTZ NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'completed')),
-  cancelled_by TEXT CHECK (cancelled_by IS NULL OR cancelled_by IN ('customer', 'admin')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'cancelled', 'completed')),
+  cancelled_by TEXT CHECK (cancelled_by IS NULL OR cancelled_by IN ('customer', 'admin', 'rejected')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CHECK (end_at > start_at)

@@ -166,6 +166,12 @@ export default function BookingClient({
             <p className="text-gray-600">
               {formatTime(previewStart)} – {formatTime(previewEnd)} ({duration} min)
             </p>
+            {business.require_booking_approval && (
+              <p className="mt-2 text-amber-800">
+                El negocio debe aprobar esta solicitud. El horario sigue disponible para
+                otras personas hasta que te confirmen.
+              </p>
+            )}
           </div>
         )}
 
@@ -176,7 +182,11 @@ export default function BookingClient({
           disabled={isPending || !slotIsValid}
           className="btn btn-primary w-full"
         >
-          {isPending ? "Reservando..." : "Confirmar reserva"}
+          {isPending
+            ? "Enviando..."
+            : business.require_booking_approval
+              ? "Solicitar reserva"
+              : "Confirmar reserva"}
         </button>
       </form>
     </div>

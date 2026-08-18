@@ -12,9 +12,14 @@ export default function BookedToast() {
   const shown = useRef(false);
 
   useEffect(() => {
-    if (shown.current || searchParams.get("booked") !== "1") return;
+    const booked = searchParams.get("booked");
+    if (shown.current || (booked !== "1" && booked !== "pending")) return;
     shown.current = true;
-    toast.success("Reserva confirmada.");
+    toast.success(
+      booked === "pending"
+        ? "Solicitud enviada. El negocio debe aprobarla."
+        : "Reserva confirmada."
+    );
     router.replace(pathname, { scroll: false });
   }, [pathname, router, searchParams, toast]);
 

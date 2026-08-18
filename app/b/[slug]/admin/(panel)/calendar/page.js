@@ -15,7 +15,7 @@ export default async function AdminCalendarPage({ params, searchParams }) {
   const { business } = auth;
 
   const date = sp?.date || todayDateInputStr();
-  const calendarData = await getCalendarData(business.id, date);
+  const calendarData = await getCalendarData(business.id, date, { includePending: true });
 
   return (
     <AdminShell

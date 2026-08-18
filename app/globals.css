@@ -171,6 +171,11 @@ body {
 .slot-available:hover { background: #f3f4f6; border-color: #d1d5db; }
 .slot-booked { background: #e5e7eb; border: 1px solid #d1d5db; cursor: default; }
 .slot-own { background: #dbeafe; border: 1px solid #93c5fd; cursor: default; }
+.slot-pending {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #78350f;
+}
 .slot-blocked {
   background: repeating-linear-gradient(
     -45deg,

@@ -10,6 +10,9 @@ import {
   listAdmins,
   listServices,
   listCustomerAppointments,
+  customerHasOverlappingRequest,
+  rejectOverlappingPending,
+  notifyCustomersRejected,
 } from "@/lib/queries";
 import { getSession } from "@/lib/session";
 import {
@@ -102,6 +105,17 @@ export async function customerBook(slug, formData) {
   const free = await isSlotFree(auth.business, spaceId, time, date, duration);
   if (!free) return { error: "Ese espacio ya no está disponible en ese horario." };
 
+  const overlappingOwn = await customerHasOverlappingRequest({
+    customerId: auth.customer.id,
+    spaceId,
+    startAt,
+    endAt,
+  });
+  if (overlappingOwn) {
+    return { error: "Ya tienes una reserva o solicitud en ese espacio y horario." };
+  }
+
+  const needsApproval = Boolean(auth.business.require_booking_approval);
   const apt = await createAppointment({
     businessId: auth.business.id,
     customerId: auth.customer.id,
@@ -109,7 +123,19 @@ export async function customerBook(slug, formData) {
     startAt,
     endAt,
     serviceIds: selected,
+    status: needsApproval ? "pending" : "active",
   });
+
+  if (!needsApproval) {
+    const displaced = await rejectOverlappingPending({
+      businessId: auth.business.id,
+      spaceId,
+      startAt,
+      endAt,
+      excludeId: apt.id,
+    });
+    await notifyCustomersRejected(auth.business.id, displaced);
+  }
 
   if (auth.business.notify_new_booking) {
     await createNotification({
@@ -117,8 +143,10 @@ export async function customerBook(slug, formData) {
       recipientRole: "customer",
       recipientId: auth.customer.id,
       type: "booking",
-      title: "Reserva confirmada",
-      body: `Cita el ${formatDateShort(startAt)} de ${formatTime(startAt)} a ${formatTime(endAt)}.`,
+      title: needsApproval ? "Solicitud enviada" : "Reserva confirmada",
+      body: needsApproval
+        ? `Solicitaste cita el ${formatDateShort(startAt)} de ${formatTime(startAt)} a ${formatTime(endAt)}. Quedará confirmada cuando el negocio la apruebe.`
+        : `Cita el ${formatDateShort(startAt)} de ${formatTime(startAt)} a ${formatTime(endAt)}.`,
     });
     const admins = await listAdmins(auth.business.id);
     for (const admin of admins) {
@@ -127,14 +155,18 @@ export async function customerBook(slug, formData) {
         recipientRole: "admin",
         recipientId: admin.id,
         type: "booking",
-        title: "Nueva reserva",
-        body: `${auth.customer.name || auth.customer.phone} reservó el ${formatDateShort(startAt)} a las ${formatTime(startAt)}.`,
+        title: needsApproval ? "Nueva solicitud de reserva" : "Nueva reserva",
+        body: needsApproval
+          ? `${auth.customer.name || auth.customer.phone} solicitó el ${formatDateShort(startAt)} a las ${formatTime(startAt)}. Pendiente de aprobación.`
+          : `${auth.customer.name || auth.customer.phone} reservó el ${formatDateShort(startAt)} a las ${formatTime(startAt)}.`,
       });
     }
   }
 
   revalidatePath(`/b/${slug}/app`);
-  redirect(`/b/${slug}/app?booked=1`);
+  revalidatePath(`/b/${slug}/admin`);
+  revalidatePath(`/b/${slug}/admin/calendar`);
+  redirect(`/b/${slug}/app?booked=${needsApproval ? "pending" : "1"}`);
 }
 
 export async function customerCancel(slug, appointmentId) {
@@ -146,13 +178,17 @@ export async function customerCancel(slug, appointmentId) {
     auth.business.id
   );
   const apt = appointments.find((a) => a.id === appointmentId);
-  if (!apt || apt.status !== "active") return { error: "Reserva no encontrada." };
+  if (!apt || !["active", "pending"].includes(apt.status)) {
+    return { error: "Reserva no encontrada." };
+  }
 
-  const hoursLeft = (new Date(apt.start_at) - Date.now()) / (1000 * 60 * 60);
-  if (hoursLeft < auth.business.min_modify_hours) {
-    return {
-      error: `Solo puedes modificar con al menos ${auth.business.min_modify_hours} horas de anticipación.`,
-    };
+  if (apt.status === "active") {
+    const hoursLeft = (new Date(apt.start_at) - Date.now()) / (1000 * 60 * 60);
+    if (hoursLeft < auth.business.min_modify_hours) {
+      return {
+        error: `Solo puedes modificar con al menos ${auth.business.min_modify_hours} horas de anticipación.`,
+      };
+    }
   }
 
   await cancelAppointment(apt.id, auth.business.id, "customer");
@@ -172,6 +208,8 @@ export async function customerCancel(slug, appointmentId) {
   }
 
   revalidatePath(`/b/${slug}/app/reservations`);
+  revalidatePath(`/b/${slug}/admin`);
+  revalidatePath(`/b/${slug}/admin/calendar`);
   return { success: true };
 }
 
@@ -184,13 +222,17 @@ export async function customerReschedule(slug, appointmentId, formData) {
     auth.business.id
   );
   const apt = appointments.find((a) => a.id === appointmentId);
-  if (!apt || apt.status !== "active") return { error: "Reserva no encontrada." };
+  if (!apt || !["active", "pending"].includes(apt.status)) {
+    return { error: "Reserva no encontrada." };
+  }
 
-  const hoursLeft = (new Date(apt.start_at) - Date.now()) / (1000 * 60 * 60);
-  if (hoursLeft < auth.business.min_modify_hours) {
-    return {
-      error: `Solo puedes modificar con al menos ${auth.business.min_modify_hours} horas de anticipación.`,
-    };
+  if (apt.status === "active") {
+    const hoursLeft = (new Date(apt.start_at) - Date.now()) / (1000 * 60 * 60);
+    if (hoursLeft < auth.business.min_modify_hours) {
+      return {
+        error: `Solo puedes modificar con al menos ${auth.business.min_modify_hours} horas de anticipación.`,
+      };
+    }
   }
 
   const date = formData.get("date");
@@ -221,12 +263,36 @@ export async function customerReschedule(slug, appointmentId, formData) {
   );
   if (!free) return { error: "Ese horario no está disponible." };
 
+  const overlappingOwn = await customerHasOverlappingRequest({
+    customerId: auth.customer.id,
+    spaceId,
+    startAt,
+    endAt,
+    excludeId: apt.id,
+  });
+  if (overlappingOwn) {
+    return { error: "Ya tienes una reserva o solicitud en ese espacio y horario." };
+  }
+
   await updateAppointment(apt.id, auth.business.id, {
     startAt,
     endAt,
     serviceIds: finalServices,
   });
 
+  if (apt.status === "active") {
+    const displaced = await rejectOverlappingPending({
+      businessId: auth.business.id,
+      spaceId,
+      startAt,
+      endAt,
+      excludeId: apt.id,
+    });
+    await notifyCustomersRejected(auth.business.id, displaced);
+  }
+
   revalidatePath(`/b/${slug}/app/reservations`);
+  revalidatePath(`/b/${slug}/admin`);
+  revalidatePath(`/b/${slug}/admin/calendar`);
   return { success: true };
 }

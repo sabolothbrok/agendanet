@@ -108,6 +108,16 @@ export default function BusinessSettingsForm({ slug, business }) {
           label="Mostrar lista de servicios a clientes"
           defaultChecked={business.show_services_list}
         />
+        <Toggle
+          name="require_booking_approval"
+          label="Aprobar reservas de clientes"
+          defaultChecked={Boolean(business.require_booking_approval)}
+        />
+        <p className="text-sm text-gray-500">
+          Si está activo, las reservas quedan pendientes hasta que las apruebes. Varios
+          clientes pueden solicitar el mismo horario; al aprobar a uno, los demás reciben
+          aviso de que el espacio ya no está disponible.
+        </p>
       </div>
 
       <div className="card space-y-3 p-4 sm:p-6">

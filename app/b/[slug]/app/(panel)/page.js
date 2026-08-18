@@ -32,7 +32,9 @@ export default async function ClientHomePage({ params, searchParams }) {
       </Suspense>
       <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Reservar cita</h1>
       <p className="mt-1 text-sm text-gray-600 sm:text-base">
-        Elige un espacio disponible en el calendario
+        {business.require_booking_approval
+          ? "Elige un espacio. Tu reserva quedará pendiente hasta que el negocio la apruebe."
+          : "Elige un espacio disponible en el calendario"}
       </p>
       <div className="mt-4 min-w-0 sm:mt-6">
         <BookingClient
