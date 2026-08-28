@@ -9,6 +9,7 @@ import {
   fitsWithinBusinessHours,
   generateTimeSlots,
   isSlotStartInPast,
+  resolveHours,
   todayDateInputStr,
   tomorrowDateInputStr,
 } from "@/lib/utils";
@@ -23,14 +24,14 @@ function overlappingAppointments(spaceId, time, date, appointments, duration) {
   });
 }
 
-function slotStatus(spaceId, time, date, appointments, blocks, duration, business, mode, currentCustomerId) {
+function slotStatus(spaceId, time, date, appointments, blocks, duration, hours, mode, currentCustomerId) {
   const overlapping = overlappingAppointments(spaceId, time, date, appointments, duration);
   const active = overlapping.filter((apt) => apt.status !== "pending");
   const pending = overlapping.filter((apt) => apt.status === "pending");
 
   if (mode === "admin") {
     if (active.length > 0) {
-      return { type: "booked", data: active[0] };
+      return { type: "booked", data: active[0], pending };
     }
     if (pending.length > 0) {
       return { type: "pending_requests", data: pending };
@@ -62,8 +63,9 @@ function slotStatus(spaceId, time, date, appointments, blocks, duration, busines
   }
 
   if (
-    business &&
-    !fitsWithinBusinessHours(start, end, business.open_hour, business.close_hour, date)
+    hours?.isClosed ||
+    (hours &&
+      !fitsWithinBusinessHours(start, end, hours.openHour, hours.closeHour, date))
   ) {
     return { type: "unavailable" };
   }
@@ -118,6 +120,17 @@ function SlotCell({
             className="mt-1 text-xs text-red-600 hover:underline"
           >
             Cancelar
+          </button>
+        )}
+        {mode === "admin" && status.pending?.length > 0 && onOpenPending && (
+          <button
+            type="button"
+            onClick={() => onOpenPending(status.pending)}
+            className="mt-1 text-xs font-medium text-amber-800 hover:underline"
+          >
+            {status.pending.length === 1
+              ? "1 solicitud en conflicto"
+              : `${status.pending.length} solicitudes en conflicto`}
           </button>
         )}
       </div>
@@ -226,16 +239,18 @@ export default function DayCalendar({
   currentCustomerId,
 }) {
   const duration = slotDuration || business.min_appointment_minutes;
-  const openStr = String(business.open_hour).slice(0, 5);
-  const closeStr = String(business.close_hour).slice(0, 5);
+  const hours = useMemo(() => resolveHours(business, date), [business, date]);
+  const openStr = hours.openHour;
+  const closeStr = hours.closeHour;
   const slots = useMemo(
     () => generateTimeSlots(openStr, closeStr, business.slot_minutes || 30),
     [openStr, closeStr, business.slot_minutes]
   );
   const visibleSlots = useMemo(() => {
+    if (hours.isClosed && mode === "customer") return [];
     if (mode !== "customer") return slots;
     return slots.filter((time) => !isSlotStartInPast(date, time));
-  }, [slots, mode, date]);
+  }, [slots, mode, date, hours.isClosed]);
   const isDesktop = useMediaQuery("(min-width: 768px)", false);
   const isToday = date === todayDateInputStr();
 
@@ -264,9 +279,33 @@ export default function DayCalendar({
         />
       </div>
 
+      {hours.isClosed && mode === "admin" ? (
+        <div className="card space-y-1 p-4 text-sm text-gray-600 sm:p-5">
+          <p className="font-medium text-gray-900">Cerrado este día</p>
+          <p>
+            En la configuración este día no tiene atención. Las reservas existentes siguen
+            visibles.
+          </p>
+        </div>
+      ) : null}
+
       {mode === "customer" && visibleSlots.length === 0 ? (
         <div className="card space-y-3 p-4 text-sm text-gray-600 sm:p-5">
-          {isToday ? (
+          {hours.isClosed ? (
+            <>
+              <p className="font-medium text-gray-900">El negocio no atiende este día</p>
+              <p>Te invitamos a elegir otra fecha en el calendario.</p>
+              {isToday && (
+                <button
+                  type="button"
+                  onClick={() => onDateChange(tomorrowDateInputStr())}
+                  className="btn btn-secondary text-sm"
+                >
+                  Ver disponibilidad de mañana
+                </button>
+              )}
+            </>
+          ) : isToday ? (
             <>
               <p className="font-medium text-gray-900">
                 No hay más horarios disponibles para hoy
@@ -308,7 +347,7 @@ export default function DayCalendar({
                   appointments,
                   blocks,
                   duration,
-                  business,
+                  hours,
                   mode,
                   currentCustomerId
                 );
@@ -375,7 +414,7 @@ export default function DayCalendar({
                     appointments,
                     blocks,
                     duration,
-                    business,
+                    hours,
                     mode,
                     currentCustomerId
                   );

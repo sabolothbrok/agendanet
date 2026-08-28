@@ -4,6 +4,7 @@
 -- ============================================================
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE TABLE IF NOT EXISTS platform_admins (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -45,7 +46,19 @@ CREATE TABLE IF NOT EXISTS business_settings (
   notify_new_booking BOOLEAN NOT NULL DEFAULT TRUE,
   notify_cancel_booking BOOLEAN NOT NULL DEFAULT TRUE,
   require_booking_approval BOOLEAN NOT NULL DEFAULT FALSE,
+  use_custom_weekly_hours BOOLEAN NOT NULL DEFAULT FALSE,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Horario por día (0 = lunes … 6 = domingo). Solo se usa si use_custom_weekly_hours = TRUE.
+CREATE TABLE IF NOT EXISTS business_weekly_hours (
+  business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  weekday SMALLINT NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+  is_open BOOLEAN NOT NULL DEFAULT TRUE,
+  open_hour TIME NOT NULL DEFAULT '09:00',
+  close_hour TIME NOT NULL DEFAULT '18:00',
+  PRIMARY KEY (business_id, weekday),
+  CHECK (close_hour > open_hour)
 );
 
 -- Un administrador por negocio
@@ -116,11 +129,20 @@ CREATE TABLE IF NOT EXISTS appointments (
   start_at TIMESTAMPTZ NOT NULL,
   end_at TIMESTAMPTZ NOT NULL,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'cancelled', 'completed')),
-  cancelled_by TEXT CHECK (cancelled_by IS NULL OR cancelled_by IN ('customer', 'admin', 'rejected')),
+  cancelled_by TEXT CHECK (cancelled_by IS NULL OR cancelled_by IN ('customer', 'admin', 'rejected', 'expired', 'declined')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CHECK (end_at > start_at)
 );
+
+ALTER TABLE appointments DROP CONSTRAINT IF EXISTS appointments_no_overlap_active;
+ALTER TABLE appointments
+  ADD CONSTRAINT appointments_no_overlap_active
+  EXCLUDE USING gist (
+    space_id WITH =,
+    tstzrange(start_at, end_at, '[)') WITH &&
+  )
+  WHERE (status = 'active');
 
 CREATE TABLE IF NOT EXISTS appointment_services (
   appointment_id UUID NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
@@ -142,9 +164,24 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 CREATE INDEX IF NOT EXISTS idx_appointments_business_start ON appointments (business_id, start_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_customer ON appointments (customer_id, start_at DESC);
+CREATE INDEX IF NOT EXISTS idx_appointments_space_start ON appointments (space_id, start_at);
 CREATE INDEX IF NOT EXISTS idx_notifications_recipient ON notifications (recipient_role, recipient_id, read_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_business ON notifications (business_id);
 CREATE INDEX IF NOT EXISTS idx_space_blocks_space ON space_blocks (space_id, start_at);
 CREATE INDEX IF NOT EXISTS idx_customers_business ON customers (business_id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_services_business ON services (business_id);
+
+CREATE TABLE IF NOT EXISTS auth_attempts (
+  key TEXT NOT NULL,
+  attempted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_attempts_key_time ON auth_attempts (key, attempted_at);
+
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  filename TEXT PRIMARY KEY,
+  applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
 INSERT INTO platform_admins (phone, name)
 SELECT '77770000', 'Admin General'

@@ -64,7 +64,7 @@ export default function ClientNav({
               key={href}
               href={href}
               className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium ${
-                active ? "text-gray-900" : "text-gray-500"
+                active ? "nav-icon-active" : "text-gray-500"
               }`}
             >
               <Icon size={22} strokeWidth={active ? 2.25 : 1.75} />
@@ -86,7 +86,7 @@ export default function ClientNav({
               href={href}
               className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium ${
                 active
-                  ? "border-gray-900 text-gray-900"
+                  ? "nav-tab-active"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >

@@ -1,8 +1,8 @@
 /**
- * Applies db/schema.sql to Neon.
- * Usage: npm run db:setup
+ * Applies db/schema.sql to Neon. DESTRUCTIVE — drops all tables.
+ * Usage: ALLOW_DB_RESET=1 npm run db:setup
  */
-const { readFileSync, existsSync } = require("fs");
+const { readFileSync, existsSync, readdirSync } = require("fs");
 const { join } = require("path");
 const { Pool } = require("@neondatabase/serverless");
 
@@ -25,14 +25,25 @@ function loadEnv() {
 loadEnv();
 
 async function main() {
+  if (process.env.ALLOW_DB_RESET !== "1") {
+    console.error("db:setup borra TODOS los datos de DATABASE_URL.");
+    console.error("Para una base existente usa: npm run db:migrate");
+    console.error("Para resetear de verdad: ALLOW_DB_RESET=1 npm run db:setup");
+    process.exit(1);
+  }
+
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     console.error("Missing DATABASE_URL in .env.local");
     process.exit(1);
   }
 
-  const reset = readFileSync(join(__dirname, "..", "db", "reset.sql"), "utf8");
-  const schema = readFileSync(join(__dirname, "..", "db", "schema.sql"), "utf8");
+  const dbDir = join(__dirname, "..", "db");
+  const reset = readFileSync(join(dbDir, "reset.sql"), "utf8");
+  const schema = readFileSync(join(dbDir, "schema.sql"), "utf8");
+  const migrateFiles = readdirSync(dbDir)
+    .filter((f) => f.startsWith("migrate-") && f.endsWith(".sql"))
+    .sort();
   const pool = new Pool({ connectionString });
 
   try {
@@ -40,6 +51,12 @@ async function main() {
     await pool.query(reset);
     console.log("Aplicando esquema...");
     await pool.query(schema);
+    for (const file of migrateFiles) {
+      await pool.query(
+        "INSERT INTO schema_migrations (filename) VALUES ($1) ON CONFLICT DO NOTHING",
+        [file]
+      );
+    }
     const { rows } = await pool.query(
       "SELECT slug, name FROM businesses ORDER BY name"
     );

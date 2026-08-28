@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { joinWithInviteAction } from "@/app/actions/auth";
+import { unstable_rethrow } from "next/navigation";
 
 export default function JoinForm({ slug, token, businessName }) {
   const [error, setError] = useState("");
@@ -12,8 +13,13 @@ export default function JoinForm({ slug, token, businessName }) {
     setError("");
     const fd = new FormData(e.target);
     startTransition(async () => {
-      const res = await joinWithInviteAction(slug, token, fd);
-      if (res?.error) setError(res.error);
+      try {
+        const res = await joinWithInviteAction(slug, token, fd);
+        if (res?.error) setError(res.error);
+      } catch (error) {
+        unstable_rethrow(error);
+        setError("No se pudo completar el registro. Intenta de nuevo.");
+      }
     });
   }
 
@@ -22,6 +28,8 @@ export default function JoinForm({ slug, token, businessName }) {
       <h1 className="text-xl font-semibold text-gray-900">Unirse a {businessName}</h1>
       <p className="mt-2 text-sm text-gray-600">
         Completa tu registro con teléfono. Luego podrás entrar solo con tu número.
+        Este enlace es abierto: cualquiera que lo tenga puede crear una cuenta hasta
+        que expire.
       </p>
       {error && (
         <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>

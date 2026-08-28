@@ -107,8 +107,9 @@ export default function CustomersClient({ slug, customers: initial }) {
       <div className="card p-4 sm:p-6">
         <h2 className="font-semibold text-gray-900">Invitar clientes</h2>
         <p className="mt-1 text-sm text-gray-600">
-          Genera un enlace y compártelo por mensaje. El cliente se registra con su teléfono.
-          El enlace vence en {INVITE_TTL_MINUTES} minutos.
+          Genera un enlace y compártelo por mensaje. Cualquier persona con el enlace
+          puede registrarse con su teléfono mientras no expire ({INVITE_TTL_MINUTES}{" "}
+          minutos).
         </p>
         <button
           type="button"
@@ -163,6 +164,8 @@ export default function CustomersClient({ slug, customers: initial }) {
               <button
                 type="button"
                 onClick={() => togglePremium(c.id, c.is_premium)}
+                aria-pressed={Boolean(c.is_premium)}
+                aria-label={c.is_premium ? "Quitar premium" : "Marcar premium"}
                 className={`badge shrink-0 ${c.is_premium ? "badge-success" : "badge-neutral"}`}
               >
                 {c.is_premium ? "Premium" : "Estándar"}
@@ -203,6 +206,8 @@ export default function CustomersClient({ slug, customers: initial }) {
                   <button
                     type="button"
                     onClick={() => togglePremium(c.id, c.is_premium)}
+                    aria-pressed={Boolean(c.is_premium)}
+                    aria-label={c.is_premium ? "Quitar premium" : "Marcar premium"}
                     className={`badge ${c.is_premium ? "badge-success" : "badge-neutral"}`}
                   >
                     {c.is_premium ? "Sí" : "No"}

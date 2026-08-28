@@ -73,7 +73,7 @@ export default function AdminNav({ slug, businessName, current, isPlatformAdmin 
               href={`${base}${href}`}
               className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium ${
                 isActive(current, href)
-                  ? "bg-gray-900 text-white"
+                  ? "nav-link-active"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >
@@ -99,21 +99,19 @@ export default function AdminNav({ slug, businessName, current, isPlatformAdmin 
         className="app-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white md:hidden"
         aria-label="Navegación admin"
       >
-        <div className="grid grid-cols-6 min-w-0">
+        <div className="grid grid-cols-6 min-w-0 overflow-x-auto">
           {links.map(({ href, label, short, icon: Icon }) => (
             <Link
               key={href}
               href={`${base}${href}`}
               aria-label={label}
               aria-current={isActive(current, href) ? "page" : undefined}
-              className={`flex min-h-[3.25rem] flex-col items-center justify-center py-2 ${
-                isActive(current, href)
-                  ? "text-gray-900"
-                  : "text-gray-500"
+              className={`flex min-h-[3.25rem] flex-col items-center justify-center px-0.5 py-1.5 ${
+                isActive(current, href) ? "nav-icon-active" : "text-gray-500"
               }`}
             >
-              <Icon size={22} strokeWidth={isActive(current, href) ? 2.25 : 1.75} />
-              <span className="sr-only">{short}</span>
+              <Icon size={20} strokeWidth={isActive(current, href) ? 2.25 : 1.75} />
+              <span className="nav-bottom-label">{short}</span>
             </Link>
           ))}
         </div>

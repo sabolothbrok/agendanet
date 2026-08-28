@@ -14,6 +14,7 @@ import {
   formatTime,
   isSlotBookable,
   isSlotStartInPast,
+  resolveHours,
 } from "@/lib/utils";
 import { formatOptionalPrice } from "@/lib/utils";
 
@@ -42,25 +43,30 @@ export default function BookingClient({
     return Math.max(total, business.min_appointment_minutes);
   })();
 
+  const hours = resolveHours(business, date);
+
   const slotIsValid = selectedSlot
-    ? isSlotBookable({
+    ? !hours.isClosed &&
+      isSlotBookable({
         spaceId: selectedSlot.spaceId,
         time: selectedSlot.time,
         dateStr: date,
         duration,
-        openHour: business.open_hour,
-        closeHour: business.close_hour,
+        openHour: hours.openHour,
+        closeHour: hours.closeHour,
         appointments: calendarData.appointments,
         blocks: calendarData.blocks,
       })
     : false;
 
   const validationMessage = selectedSlot
-    ? isSlotStartInPast(date, selectedSlot.time)
-      ? "Ese horario ya pasó."
-      : !slotIsValid
-        ? "Ese horario ya no alcanza para la duración seleccionada."
-        : ""
+    ? hours.isClosed
+      ? "El negocio no atiende este día."
+      : isSlotStartInPast(date, selectedSlot.time)
+        ? "Ese horario ya pasó."
+        : !slotIsValid
+          ? "Ese horario ya no alcanza para la duración seleccionada."
+          : ""
     : "";
 
   function handleSelectSlot(slot) {

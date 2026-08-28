@@ -57,7 +57,7 @@ export default function PendingRequestsList({ slug, appointments, onResolved }) 
   async function reject(apt) {
     const ok = await confirm({
       title: "No confirmar reserva",
-      message: `${apt.customer_name || apt.customer_phone} recibirá aviso de que el espacio ya no está disponible.`,
+      message: `${apt.customer_name || apt.customer_phone} verá en Mis reservas que la solicitud no fue confirmada.`,
       confirmLabel: "No confirmar",
       cancelLabel: "Volver",
     });

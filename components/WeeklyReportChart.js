@@ -60,7 +60,7 @@ export default function WeeklyReportChart({
                   <div key={`${d.label}-${d.date}`} className="flex min-w-0 flex-col items-center gap-1.5">
                     <div className="flex h-[6.5rem] w-full items-end px-0.5">
                       <div
-                        className={`w-full min-h-[4px] rounded-t-md ${isPeak ? "bg-gray-900" : "bg-gray-300"}`}
+                        className={`chart-bar w-full min-h-[4px] rounded-t-md ${isPeak ? "chart-bar--peak" : ""}`}
                         style={{ height: `${Math.max(barHeight, d.value > 0 ? 4 : 0)}px` }}
                       />
                     </div>

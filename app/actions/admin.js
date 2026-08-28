@@ -10,6 +10,7 @@ import {
   deleteCustomer,
   deleteSpaceBlock,
   getCalendarData,
+  getActiveSpace,
   listAdmins,
   listCustomers,
   listNotifications,
@@ -19,6 +20,7 @@ import {
   toggleCustomerPremium,
   updateBusinessSettings,
   updateBusinessSchedule,
+  replaceWeeklyHours,
   upsertService,
   deleteService,
   getTodayAppointments,
@@ -26,15 +28,13 @@ import {
   updateSpaceName,
   approveAppointment,
   rejectAppointment,
-  notifyCustomersRejected,
 } from "@/lib/queries";
 import { getSession } from "@/lib/session";
 import { formatDateShort, formatTime, normalizeBusinessTime, parseBusinessMinutes } from "@/lib/utils";
-import { BOOKING_REJECTED_TITLE, BOOKING_REJECTED_BODY } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
 
 async function guard(slug) {
-  const session = await getSession();
+  const session = await getSession({ touch: true });
   return requireAdminSession(session, slug);
 }
 
@@ -46,14 +46,6 @@ export async function adminCancelAppointment(slug, appointmentId) {
   if (!apt) return { error: "No se pudo cancelar." };
 
   if (auth.business.notify_cancel_booking) {
-    await createNotification({
-      businessId: auth.business.id,
-      recipientRole: "customer",
-      recipientId: apt.customer_id,
-      type: "cancel",
-      title: "Cita cancelada",
-      body: `Tu cita del ${formatDateShort(apt.start_at)} fue cancelada por el negocio.`,
-    });
     const admins = await listAdmins(auth.business.id);
     for (const admin of admins) {
       await createNotification({
@@ -77,11 +69,23 @@ export async function adminToggleBlock(slug, { spaceId, date, time, duration, bl
   if (auth.error) return { error: "No autorizado" };
 
   const { combineDateAndTime, addMinutes, overlaps } = await import("@/lib/utils");
+  const space = await getActiveSpace(auth.business.id, spaceId);
+  if (!space && block) return { error: "Espacio inválido." };
+
   const startAt = combineDateAndTime(date, time);
   const endAt = addMinutes(startAt, duration || auth.business.min_appointment_minutes);
 
   if (block) {
-    const { blocks } = await getCalendarData(auth.business.id, date);
+    const { appointments, blocks } = await getCalendarData(auth.business.id, date);
+    const hasAppointment = appointments.some(
+      (a) =>
+        a.status !== "pending" &&
+        a.space_id === spaceId &&
+        overlaps(startAt, endAt, new Date(a.start_at), new Date(a.end_at))
+    );
+    if (hasAppointment) {
+      return { error: "Hay una cita en ese horario. Cancélala antes de bloquear." };
+    }
     const alreadyBlocked = blocks.some(
       (b) =>
         b.space_id === spaceId &&
@@ -140,11 +144,22 @@ export async function adminSaveService(slug, formData) {
   const auth = await guard(slug);
   if (auth.error) return { error: "No autorizado" };
 
+  const name = String(formData.get("name") || "").trim();
+  const durationMinutes = Number(formData.get("duration_minutes"));
+  const price = Number(formData.get("price"));
+  if (!name) return { error: "Ingresa el nombre del servicio." };
+  if (!Number.isFinite(durationMinutes) || durationMinutes < 5) {
+    return { error: "La duración debe ser de al menos 5 minutos." };
+  }
+  if (!Number.isFinite(price) || price < 0) {
+    return { error: "El precio no puede ser negativo." };
+  }
+
   const service = await upsertService(auth.business.id, {
     id: formData.get("id") || null,
-    name: formData.get("name"),
-    duration_minutes: Number(formData.get("duration_minutes")),
-    price: Number(formData.get("price")) || 0,
+    name,
+    duration_minutes: durationMinutes,
+    price,
     is_premium: formData.get("is_premium") === "on",
     is_active: formData.get("is_active") !== "off",
   });
@@ -171,6 +186,7 @@ export async function adminSaveSettings(slug, formData) {
   const openHour = normalizeBusinessTime(formData.get("open_hour") || "");
   const closeHour = normalizeBusinessTime(formData.get("close_hour") || "");
   const slotMinutes = Number(formData.get("slot_minutes"));
+  const useCustomWeeklyHours = formData.get("schedule_mode") === "custom";
 
   if (!/^\d{2}:\d{2}$/.test(openHour) || !/^\d{2}:\d{2}$/.test(closeHour)) {
     return { error: "Ingresa un horario de apertura y cierre válido." };
@@ -186,18 +202,37 @@ export async function adminSaveSettings(slug, formData) {
     return { error: "El intervalo del calendario debe ser 15, 30 o 60 minutos." };
   }
 
+  let weeklyDays = null;
+  if (useCustomWeeklyHours) {
+    weeklyDays = [];
+    for (let weekday = 0; weekday <= 6; weekday += 1) {
+      const isOpen = formData.get(`day_${weekday}_open`) === "on";
+      const dayOpen = normalizeBusinessTime(formData.get(`day_${weekday}_open_hour`) || openHour);
+      const dayClose = normalizeBusinessTime(formData.get(`day_${weekday}_close_hour`) || closeHour);
+      if (!/^\d{2}:\d{2}$/.test(dayOpen) || !/^\d{2}:\d{2}$/.test(dayClose)) {
+        return { error: "Cada día abierto necesita un horario válido." };
+      }
+      if (!(parseBusinessMinutes(dayClose) > parseBusinessMinutes(dayOpen))) {
+        return { error: "En cada día abierto, el cierre debe ser posterior a la apertura." };
+      }
+      weeklyDays.push({ weekday, isOpen, openHour: dayOpen, closeHour: dayClose });
+    }
+    if (!weeklyDays.some((d) => d.isOpen)) {
+      return { error: "Debe haber al menos un día de atención." };
+    }
+  }
+
   const minModifyHours = Number(formData.get("min_modify_hours"));
   const minAppointmentMinutes = Number(formData.get("min_appointment_minutes"));
-  const notifyInactiveDays = Number(formData.get("notify_inactive_days"));
 
   if (!Number.isFinite(minModifyHours) || minModifyHours < 0) {
     return { error: "Las horas mínimas para modificar deben ser un número válido." };
   }
-  if (!Number.isFinite(minAppointmentMinutes) || minAppointmentMinutes < 15) {
-    return { error: "La duración mínima de cita debe ser al menos 15 minutos." };
+  if (!Number.isFinite(minAppointmentMinutes) || minAppointmentMinutes < slotMinutes) {
+    return { error: "La duración mínima de cita debe ser al menos el intervalo del calendario." };
   }
-  if (!Number.isFinite(notifyInactiveDays) || notifyInactiveDays < 1) {
-    return { error: "Los días sin cita para avisar deben ser al menos 1." };
+  if (minAppointmentMinutes % slotMinutes !== 0) {
+    return { error: "La duración mínima debe ser un múltiplo del intervalo del calendario." };
   }
 
   await updateBusinessSchedule(auth.business.id, {
@@ -206,16 +241,23 @@ export async function adminSaveSettings(slug, formData) {
     slotMinutes,
   });
 
+  if (weeklyDays) {
+    await replaceWeeklyHours(auth.business.id, weeklyDays);
+  } else {
+    await replaceWeeklyHours(auth.business.id, []);
+  }
+
   await updateBusinessSettings(auth.business.id, {
     min_modify_hours: minModifyHours,
     min_appointment_minutes: minAppointmentMinutes,
     show_services_list: formData.get("show_services_list") === "on",
-    reminders_enabled: formData.get("reminders_enabled") === "on",
-    notify_inactive_enabled: formData.get("notify_inactive_enabled") === "on",
-    notify_inactive_days: notifyInactiveDays,
+    reminders_enabled: Boolean(auth.business.reminders_enabled),
+    notify_inactive_enabled: false,
+    notify_inactive_days: Number(auth.business.notify_inactive_days) || 30,
     notify_new_booking: formData.get("notify_new_booking") === "on",
     notify_cancel_booking: formData.get("notify_cancel_booking") === "on",
     require_booking_approval: formData.get("require_booking_approval") === "on",
+    use_custom_weekly_hours: useCustomWeeklyHours,
   });
 
   revalidatePath(`/b/${slug}/admin/settings`);
@@ -273,15 +315,19 @@ export async function adminApproveAppointment(slug, appointmentId) {
   if (result.error) return { error: result.error };
 
   const apt = result.appointment;
-  await createNotification({
-    businessId: auth.business.id,
-    recipientRole: "customer",
-    recipientId: apt.customer_id,
-    type: "booking",
-    title: "Reserva confirmada",
-    body: `Cita el ${formatDateShort(apt.start_at)} de ${formatTime(apt.start_at)} a ${formatTime(apt.end_at)}.`,
-  });
-  await notifyCustomersRejected(auth.business.id, result.rejected || []);
+  if (auth.business.notify_new_booking) {
+    const admins = await listAdmins(auth.business.id);
+    for (const admin of admins) {
+      await createNotification({
+        businessId: auth.business.id,
+        recipientRole: "admin",
+        recipientId: admin.id,
+        type: "booking",
+        title: "Reserva confirmada",
+        body: `Se aprobó la cita de ${formatDateShort(apt.start_at)} a las ${formatTime(apt.start_at)}.`,
+      });
+    }
+  }
 
   revalidatePath(`/b/${slug}/admin`);
   revalidatePath(`/b/${slug}/admin/calendar`);
@@ -294,17 +340,22 @@ export async function adminRejectAppointment(slug, appointmentId) {
   const auth = await guard(slug);
   if (auth.error) return { error: "No autorizado" };
 
-  const apt = await rejectAppointment(appointmentId, auth.business.id);
+  const apt = await rejectAppointment(appointmentId, auth.business.id, "declined");
   if (!apt) return { error: "La solicitud ya no está pendiente." };
 
-  await createNotification({
-    businessId: auth.business.id,
-    recipientRole: "customer",
-    recipientId: apt.customer_id,
-    type: "booking",
-    title: BOOKING_REJECTED_TITLE,
-    body: BOOKING_REJECTED_BODY,
-  });
+  if (auth.business.notify_cancel_booking) {
+    const admins = await listAdmins(auth.business.id);
+    for (const admin of admins) {
+      await createNotification({
+        businessId: auth.business.id,
+        recipientRole: "admin",
+        recipientId: admin.id,
+        type: "booking",
+        title: "Solicitud no confirmada",
+        body: `No se confirmó la solicitud de ${formatDateShort(apt.start_at)} a las ${formatTime(apt.start_at)}.`,
+      });
+    }
+  }
 
   revalidatePath(`/b/${slug}/admin`);
   revalidatePath(`/b/${slug}/admin/calendar`);

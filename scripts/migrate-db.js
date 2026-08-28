@@ -1,8 +1,8 @@
 /**
- * Applies additive SQL in db/migrate-approval.sql without dropping data.
+ * Applies additive SQL in db/migrate-*.sql without dropping data.
  * Usage: npm run db:migrate
  */
-const { readFileSync, existsSync } = require("fs");
+const { readFileSync, existsSync, readdirSync } = require("fs");
 const { join } = require("path");
 const { Pool } = require("@neondatabase/serverless");
 
@@ -31,21 +31,52 @@ async function main() {
     process.exit(1);
   }
 
-  const sql = readFileSync(join(__dirname, "..", "db", "migrate-approval.sql"), "utf8");
+  const dbDir = join(__dirname, "..", "db");
+  const files = readdirSync(dbDir)
+    .filter((f) => f.startsWith("migrate-") && f.endsWith(".sql"))
+    .sort();
+
   const pool = new Pool({ connectionString });
 
   try {
-    console.log("Aplicando migración de aprobación de reservas...");
-    await pool.query(sql);
-    const { rows } = await pool.query(`
-      SELECT column_name
-      FROM information_schema.columns
-      WHERE table_name = 'business_settings' AND column_name = 'require_booking_approval'
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        filename TEXT PRIMARY KEY,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
     `);
-    if (!rows.length) {
-      throw new Error("La columna require_booking_approval no se creó.");
+
+    const { rows: appliedRows } = await pool.query(
+      "SELECT filename FROM schema_migrations"
+    );
+    const applied = new Set(appliedRows.map((r) => r.filename));
+
+    if (applied.size === 0) {
+      const { rows: existing } = await pool.query(
+        "SELECT to_regclass('public.appointments') AS t"
+      );
+      if (existing[0]?.t) {
+        for (const file of files) {
+          if (file === "migrate-integrity.sql") continue;
+          await pool.query(
+            "INSERT INTO schema_migrations (filename) VALUES ($1) ON CONFLICT DO NOTHING",
+            [file]
+          );
+          applied.add(file);
+        }
+      }
     }
-    console.log("Migración aplicada.");
+
+    for (const file of files) {
+      if (applied.has(file)) {
+        console.log(`Omitiendo ${file} (ya aplicada)`);
+        continue;
+      }
+      console.log(`Aplicando ${file}...`);
+      await pool.query(readFileSync(join(dbDir, file), "utf8"));
+      await pool.query("INSERT INTO schema_migrations (filename) VALUES ($1)", [file]);
+    }
+    console.log("Migraciones aplicadas.");
   } finally {
     await pool.end();
   }

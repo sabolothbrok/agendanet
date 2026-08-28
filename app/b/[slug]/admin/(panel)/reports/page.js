@@ -44,7 +44,7 @@ export default async function AdminReportsPage({ params }) {
       isPlatformAdmin={isPlatformAdmin}
     >
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white">
+        <span className="icon-badge h-10 w-10 shrink-0 rounded-xl">
           <BarChart3 className="h-5 w-5" aria-hidden />
         </span>
         <div>
@@ -67,11 +67,15 @@ export default async function AdminReportsPage({ params }) {
             <WeeklyReportChart
               eyebrow="Ocupación por día"
               title="Estaciones en la semana"
-              description={`Basado en ${report.spaceCount} estación${report.spaceCount === 1 ? "" : "es"} activa${report.spaceCount === 1 ? "" : "s"} y horario ${String(business.open_hour).slice(0, 5)}–${String(business.close_hour).slice(0, 5)}.`}
+              description={
+                business.use_custom_weekly_hours
+                  ? `Basado en ${report.spaceCount} estación${report.spaceCount === 1 ? "" : "es"} activa${report.spaceCount === 1 ? "" : "s"} y el horario de cada día.`
+                  : `Basado en ${report.spaceCount} estación${report.spaceCount === 1 ? "" : "es"} activa${report.spaceCount === 1 ? "" : "s"} y horario ${String(business.open_hour).slice(0, 5)}–${String(business.close_hour).slice(0, 5)}.`
+              }
               days={report.days}
               peak={report.peak}
               kpis={kpis}
-              footnote="La ocupación compara minutos reservados (citas activas y completadas) contra la capacidad total del día."
+              footnote="La ocupación une minutos reservados por estación (citas activas y completadas; no incluye pendientes) contra la capacidad del día, en zona de Costa Rica."
             />
           </div>
 

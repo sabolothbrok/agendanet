@@ -1,6 +1,7 @@
 import Link from "next/link";
 import IndustriesSection from "@/components/IndustriesSection";
 import LandingNav from "@/components/LandingNav";
+import LandingPhoneFrame from "@/components/LandingPhoneFrame";
 import WeeklyReportChart from "@/components/WeeklyReportChart";
 import {
   Banknote,
@@ -9,10 +10,15 @@ import {
   Calendar,
   ChartColumn,
   Check,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   CreditCard,
   LayoutGrid,
   List,
+  Lock,
+  Plus,
+  RotateCw,
   Timer,
   Users,
 } from "lucide-react";
@@ -58,7 +64,7 @@ const FEATURES = [
   {
     icon: Users,
     title: "Base de clientes",
-    text: "Historial de visitas, clientes premium y control de quién puede reservar.",
+    text: "Historial de visitas y clientes premium para servicios exclusivos.",
   },
   {
     icon: Bell,
@@ -183,9 +189,47 @@ function ExperienceSection({ tag, title, desc, items, visual, reverse = false, c
 function BrowserPreview({ children }) {
   return (
     <div className="landing-browser">
-      <div className="landing-browser-bar">
-        <span /><span /><span />
-        <div className="landing-browser-url">agendanet.app/b/mi-salon/admin</div>
+      <div className="landing-browser-chrome" aria-hidden>
+        <div className="landing-browser-tabstrip">
+          <div className="landing-browser-lights">
+            <span className="landing-browser-light landing-browser-light--close" />
+            <span className="landing-browser-light landing-browser-light--min" />
+            <span className="landing-browser-light landing-browser-light--max" />
+          </div>
+          <div className="landing-browser-tabs">
+            <div className="landing-browser-tab landing-browser-tab--active">
+              <span className="landing-browser-favicon" />
+              <span className="landing-browser-tab-label">Calendario</span>
+              <span className="landing-browser-tab-close">×</span>
+            </div>
+            <div className="landing-browser-tab">
+              <span className="landing-browser-tab-label">Inicio</span>
+            </div>
+          </div>
+          <span className="landing-browser-tab-add">
+            <Plus size={12} strokeWidth={2.25} />
+          </span>
+        </div>
+        <div className="landing-browser-toolbar">
+          <div className="landing-browser-nav">
+            <span className="landing-browser-nav-btn">
+              <ChevronLeft size={15} strokeWidth={2.25} />
+            </span>
+            <span className="landing-browser-nav-btn landing-browser-nav-btn--muted">
+              <ChevronRight size={15} strokeWidth={2.25} />
+            </span>
+            <span className="landing-browser-nav-btn">
+              <RotateCw size={13} strokeWidth={2.25} />
+            </span>
+          </div>
+          <div className="landing-browser-url">
+            <Lock size={11} strokeWidth={2.4} className="landing-browser-lock" />
+            <span className="landing-browser-url-text">
+              <span className="landing-browser-url-host">agendanet.app</span>
+              <span className="landing-browser-url-path">/b/mi-salon/admin</span>
+            </span>
+          </div>
+        </div>
       </div>
       <div className="landing-browser-content">{children}</div>
     </div>
@@ -194,10 +238,8 @@ function BrowserPreview({ children }) {
 
 function PhonePreview() {
   return (
-    <div className="landing-phone-device">
-      <div className="landing-phone">
-        <div className="landing-phone-screen">
-          <header className="landing-phone-app-header">
+    <LandingPhoneFrame>
+      <header className="landing-phone-app-header">
             <div className="min-w-0">
               <p className="landing-phone-business">Demo Uñas</p>
               <p className="landing-phone-user">María</p>
@@ -283,12 +325,7 @@ function PhonePreview() {
               Reservas
             </span>
           </nav>
-
-          <div className="landing-phone-home" aria-hidden />
-        </div>
-        <div className="landing-phone-island" aria-hidden />
-      </div>
-    </div>
+    </LandingPhoneFrame>
   );
 }
 
@@ -499,8 +536,8 @@ export default function MarketingHome() {
         <div className="landing-container landing-pad">
           <SectionHead
             tag="Precios"
-            title="Planes transparentes, sin comisiones"
-            desc="Tarifas mensuales en colones. Sin cobro por cita ni cargos ocultos."
+            title="Planes (próximamente)"
+            desc="Cobros y límites por plan aún no están activos. Hoy todos los negocios usan la plataforma completa, sin tarjeta."
           />
           <div className="landing-pricing">
             {PLANS.map((plan) => (
@@ -509,7 +546,10 @@ export default function MarketingHome() {
                 className={`landing-plan card ${plan.featured ? "landing-plan--featured" : ""}`}
               >
                 {plan.featured && <span className="landing-plan-tag">Más popular</span>}
-                <h3 className="text-lg font-semibold">{plan.name}</h3>
+                <p className="text-[0.6875rem] font-semibold uppercase tracking-wide text-gray-500">
+                  Próximamente
+                </p>
+                <h3 className="mt-1 text-lg font-semibold">{plan.name}</h3>
                 <p className="mt-3 text-4xl font-bold tracking-tight">{plan.price}</p>
                 <p className="text-sm text-gray-500">/mes</p>
                 <p className="mt-3 text-sm text-gray-600">{plan.note}</p>

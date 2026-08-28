@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import JoinForm from "@/components/JoinForm";
 import { getInviteByToken } from "@/lib/queries";
 
@@ -25,7 +24,7 @@ export default async function JoinPage({ params, searchParams }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <JoinForm slug={slug} token={token} businessName={invite.business_name} />
     </div>
   );

@@ -3,7 +3,7 @@ import AdminNav from "@/components/AdminNav";
 
 export default function AdminShell({ slug, businessName, current, isPlatformAdmin, children }) {
   return (
-    <div className="app-shell min-h-screen w-full max-w-full min-w-0 overflow-x-hidden bg-gray-50 md:flex">
+    <div className="app-shell min-h-screen w-full max-w-full min-w-0 overflow-x-hidden md:flex">
       <ScrollReset />
       <AdminNav
         slug={slug}
@@ -13,7 +13,7 @@ export default function AdminShell({ slug, businessName, current, isPlatformAdmi
       />
       <main className="page-main min-w-0 w-full max-w-full flex-1 overflow-x-hidden">
         {isPlatformAdmin && (
-          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="surface-warning mb-4 rounded-lg px-4 py-3 text-sm">
             Estás administrando este negocio como{" "}
             <span className="font-medium">admin general</span>.
           </div>

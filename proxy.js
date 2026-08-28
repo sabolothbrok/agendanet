@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE } from "./lib/auth-cookie";
+import { decodeSessionCookie, encodeSessionCookie } from "./lib/session-cookie";
 import {
   getSessionCookieMaxAge,
   getSessionCookieOptions,
@@ -8,13 +9,18 @@ import {
 } from "./lib/session-policy";
 
 function parseSession(request) {
-  const raw = request.cookies.get(SESSION_COOKIE)?.value;
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
+  return decodeSessionCookie(request.cookies.get(SESSION_COOKIE)?.value);
+}
+
+function sessionHomePath(session) {
+  if (session?.role === "platform_admin") return "/platform";
+  if (session?.role === "admin" && session.businessSlug) {
+    return `/b/${session.businessSlug}/admin`;
   }
+  if (session?.role === "customer" && session.businessSlug) {
+    return `/b/${session.businessSlug}/app`;
+  }
+  return "/login";
 }
 
 function withNoStore(response) {
@@ -31,7 +37,7 @@ function touchSessionCookie(response, session) {
   const touched = touchSessionTimestamps(session);
   response.cookies.set(
     SESSION_COOKIE,
-    JSON.stringify(touched),
+    encodeSessionCookie(touched),
     getSessionCookieOptions(getSessionCookieMaxAge(touched))
   );
   return touched;
@@ -65,6 +71,13 @@ function requireAuth(request, session, loginPath, isAuthorized) {
   }
 
   if (!isAuthorized(session)) {
+    const home = sessionHomePath(session);
+    if (home !== "/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = home;
+      url.search = "";
+      return withNoStore(NextResponse.redirect(url));
+    }
     const response = redirectToLogin(request, loginPath, { loggedOut: "1" });
     clearSessionCookie(response);
     return response;

@@ -8,7 +8,7 @@ export default function ClientShell({ slug, businessName, customer, children, ma
   const pathname = usePathname();
 
   return (
-    <div className="app-shell min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50">
+    <div className="app-shell min-h-screen w-full max-w-full overflow-x-hidden">
       <ScrollReset />
       <ClientNav
         slug={slug}

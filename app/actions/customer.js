@@ -7,12 +7,12 @@ import {
   cancelAppointment,
   updateAppointment,
   getCalendarData,
+  getActiveSpace,
   listAdmins,
   listServices,
   listCustomerAppointments,
   customerHasOverlappingRequest,
   rejectOverlappingPending,
-  notifyCustomersRejected,
 } from "@/lib/queries";
 import { getSession } from "@/lib/session";
 import {
@@ -23,13 +23,13 @@ import {
   fitsWithinBusinessHours,
   isSlotBookable,
   isSlotStartInPast,
-  normalizeBusinessTime,
+  resolveHours,
 } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 async function guard(slug) {
-  const session = await getSession();
+  const session = await getSession({ touch: true });
   return requireCustomerSession(session, slug);
 }
 
@@ -50,14 +50,16 @@ function businessFilterServices(business, serviceIds, allowed) {
 
 async function isSlotFree(business, spaceId, time, dateStr, duration, excludeId = null) {
   const { appointments, blocks } = await getCalendarData(business.id, dateStr);
+  const hours = resolveHours(business, dateStr);
+  if (hours.isClosed) return false;
 
   return isSlotBookable({
     spaceId,
     time,
     dateStr,
     duration,
-    openHour: business.open_hour,
-    closeHour: business.close_hour,
+    openHour: hours.openHour,
+    closeHour: hours.closeHour,
     appointments,
     blocks,
     excludeAppointmentId: excludeId,
@@ -65,6 +67,11 @@ async function isSlotFree(business, spaceId, time, dateStr, duration, excludeId 
 }
 
 function validateBookingTimes(business, date, time, duration) {
+  const hours = resolveHours(business, date);
+  if (hours.isClosed) {
+    return { error: "El negocio no atiende este día." };
+  }
+
   if (isSlotStartInPast(date, time)) {
     return { error: "Ese horario ya pasó." };
   }
@@ -72,9 +79,9 @@ function validateBookingTimes(business, date, time, duration) {
   const startAt = combineDateAndTime(date, time);
   const endAt = addMinutes(startAt, duration);
 
-  if (!fitsWithinBusinessHours(startAt, endAt, business.open_hour, business.close_hour, date)) {
+  if (!fitsWithinBusinessHours(startAt, endAt, hours.openHour, hours.closeHour, date)) {
     return {
-      error: `La reserva termina después del horario de cierre (${normalizeBusinessTime(business.close_hour)}).`,
+      error: `La reserva termina después del horario de cierre (${hours.closeHour}).`,
     };
   }
 
@@ -98,16 +105,19 @@ export async function customerBook(slug, formData) {
   const selected = businessFilterServices(auth.business, serviceIds, allowed);
   const duration = calcDuration(auth.business, allowed, selected);
 
+  const space = await getActiveSpace(auth.business.id, spaceId);
+  if (!space) return { error: "Espacio inválido." };
+
   const times = validateBookingTimes(auth.business, date, time, duration);
   if (times.error) return { error: times.error };
   const { startAt, endAt } = times;
 
-  const free = await isSlotFree(auth.business, spaceId, time, date, duration);
+  const free = await isSlotFree(auth.business, space.id, time, date, duration);
   if (!free) return { error: "Ese espacio ya no está disponible en ese horario." };
 
   const overlappingOwn = await customerHasOverlappingRequest({
     customerId: auth.customer.id,
-    spaceId,
+    spaceId: space.id,
     startAt,
     endAt,
   });
@@ -119,35 +129,25 @@ export async function customerBook(slug, formData) {
   const apt = await createAppointment({
     businessId: auth.business.id,
     customerId: auth.customer.id,
-    spaceId,
+    spaceId: space.id,
     startAt,
     endAt,
     serviceIds: selected,
     status: needsApproval ? "pending" : "active",
   });
+  if (!apt) return { error: "Ese espacio ya no está disponible en ese horario." };
 
   if (!needsApproval) {
-    const displaced = await rejectOverlappingPending({
+    await rejectOverlappingPending({
       businessId: auth.business.id,
-      spaceId,
+      spaceId: space.id,
       startAt,
       endAt,
       excludeId: apt.id,
     });
-    await notifyCustomersRejected(auth.business.id, displaced);
   }
 
   if (auth.business.notify_new_booking) {
-    await createNotification({
-      businessId: auth.business.id,
-      recipientRole: "customer",
-      recipientId: auth.customer.id,
-      type: "booking",
-      title: needsApproval ? "Solicitud enviada" : "Reserva confirmada",
-      body: needsApproval
-        ? `Solicitaste cita el ${formatDateShort(startAt)} de ${formatTime(startAt)} a ${formatTime(endAt)}. Quedará confirmada cuando el negocio la apruebe.`
-        : `Cita el ${formatDateShort(startAt)} de ${formatTime(startAt)} a ${formatTime(endAt)}.`,
-    });
     const admins = await listAdmins(auth.business.id);
     for (const admin of admins) {
       await createNotification({
@@ -249,13 +249,16 @@ export async function customerReschedule(slug, appointmentId, formData) {
   const finalServices = selected.length ? selected : existingServices;
   const duration = calcDuration(auth.business, allowed, finalServices);
 
+  const space = await getActiveSpace(auth.business.id, spaceId);
+  if (!space) return { error: "Espacio inválido." };
+
   const times = validateBookingTimes(auth.business, date, time, duration);
   if (times.error) return { error: times.error };
   const { startAt, endAt } = times;
 
   const free = await isSlotFree(
     auth.business,
-    spaceId,
+    space.id,
     time,
     date,
     duration,
@@ -265,7 +268,7 @@ export async function customerReschedule(slug, appointmentId, formData) {
 
   const overlappingOwn = await customerHasOverlappingRequest({
     customerId: auth.customer.id,
-    spaceId,
+    spaceId: space.id,
     startAt,
     endAt,
     excludeId: apt.id,
@@ -274,21 +277,21 @@ export async function customerReschedule(slug, appointmentId, formData) {
     return { error: "Ya tienes una reserva o solicitud en ese espacio y horario." };
   }
 
-  await updateAppointment(apt.id, auth.business.id, {
+  const updated = await updateAppointment(apt.id, auth.business.id, {
     startAt,
     endAt,
     serviceIds: finalServices,
   });
+  if (!updated) return { error: "Ese horario no está disponible." };
 
   if (apt.status === "active") {
-    const displaced = await rejectOverlappingPending({
+    await rejectOverlappingPending({
       businessId: auth.business.id,
-      spaceId,
+      spaceId: space.id,
       startAt,
       endAt,
       excludeId: apt.id,
     });
-    await notifyCustomersRejected(auth.business.id, displaced);
   }
 
   revalidatePath(`/b/${slug}/app/reservations`);

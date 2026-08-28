@@ -15,7 +15,9 @@ export default async function ClientHomePage({ params, searchParams }) {
   const auth = await requireCustomerSession(session, slug);
   const { business, customer } = auth;
 
-  const date = sp?.date || todayDateInputStr();
+  const today = todayDateInputStr();
+  const requested = sp?.date || today;
+  const date = requested < today ? today : requested;
   const [calendarData, allServices] = await Promise.all([
     getCalendarData(business.id, date, { viewerCustomerId: customer.id }),
     listServices(business.id, { activeOnly: true }),

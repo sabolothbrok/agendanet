@@ -12,12 +12,13 @@ import {
 } from "@/lib/queries";
 import { getSession, setSession } from "@/lib/session";
 import { touchSessionTimestamps } from "@/lib/session-policy";
-import { isValidSlug, normalizePhone, slugify } from "@/lib/utils";
+import { isValidSlug, normalizePhone, slugify, normalizeBusinessTime, parseBusinessMinutes } from "@/lib/utils";
+import { isUniqueViolation } from "@/lib/pg-error";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 async function guard() {
-  const session = await getSession();
+  const session = await getSession({ touch: true });
   return requirePlatformAdminSession(session);
 }
 
@@ -30,8 +31,8 @@ export async function platformCreateBusiness(formData) {
   const businessType = String(formData.get("business_type") || "general");
   const adminName = String(formData.get("admin_name") || "").trim();
   const adminPhone = normalizePhone(formData.get("admin_phone"));
-  const openHour = String(formData.get("open_hour") || "09:00");
-  const closeHour = String(formData.get("close_hour") || "18:00");
+  const openHour = normalizeBusinessTime(formData.get("open_hour") || "09:00");
+  const closeHour = normalizeBusinessTime(formData.get("close_hour") || "18:00");
 
   if (!name) return { error: "Ingresa el nombre del negocio." };
   if (!adminName) return { error: "Ingresa el nombre del administrador del negocio." };
@@ -48,20 +49,35 @@ export async function platformCreateBusiness(formData) {
     return { error: "Ese identificador ya está en uso. Elige otro." };
   }
 
+  if (!/^\d{2}:\d{2}$/.test(openHour) || !/^\d{2}:\d{2}$/.test(closeHour)) {
+    return { error: "Ingresa un horario de apertura y cierre válido." };
+  }
+  if (!(parseBusinessMinutes(closeHour) > parseBusinessMinutes(openHour))) {
+    return { error: "La hora de cierre debe ser posterior a la de apertura." };
+  }
+
   const typeExists = await getBusinessTypeBySlug(businessType);
   if (!typeExists) {
     return { error: "Selecciona un tipo de negocio válido." };
   }
 
-  const business = await createBusinessWithAdmin(auth.session.userId, {
-    slug,
-    name,
-    businessType,
-    adminName,
-    adminPhone,
-    openHour,
-    closeHour,
-  });
+  let business;
+  try {
+    business = await createBusinessWithAdmin(auth.session.userId, {
+      slug,
+      name,
+      businessType,
+      adminName,
+      adminPhone,
+      openHour,
+      closeHour,
+    });
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      return { error: "Ese identificador ya está en uso. Elige otro." };
+    }
+    throw error;
+  }
 
   revalidatePath("/platform");
   redirect(`/b/${business.slug}/admin`);

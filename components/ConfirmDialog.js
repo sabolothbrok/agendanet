@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
+const FOCUSABLE =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function ConfirmDialog({
   open,
   title,
@@ -13,22 +16,43 @@ export default function ConfirmDialog({
   onCancel,
 }) {
   const cancelRef = useRef(null);
+  const panelRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
 
+    previousFocusRef.current = document.activeElement;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     cancelRef.current?.focus();
 
     function onKeyDown(event) {
-      if (event.key === "Escape") onCancel();
+      if (event.key === "Escape") {
+        onCancel();
+        return;
+      }
+      if (event.key !== "Tab" || !panelRef.current) return;
+      const nodes = [...panelRef.current.querySelectorAll(FOCUSABLE)];
+      if (nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      if (previousFocusRef.current instanceof HTMLElement) {
+        previousFocusRef.current.focus();
+      }
     };
   }, [open, onCancel]);
 
@@ -40,6 +64,7 @@ export default function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
+      aria-describedby="confirm-dialog-message"
     >
       <button
         type="button"
@@ -48,11 +73,13 @@ export default function ConfirmDialog({
         aria-label="Cerrar"
         tabIndex={-1}
       />
-      <div className="confirm-panel card">
+      <div ref={panelRef} className="confirm-panel card">
         <h2 id="confirm-dialog-title" className="text-lg font-semibold text-gray-900">
           {title}
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600">{message}</p>
+        <p id="confirm-dialog-message" className="mt-2 text-sm leading-relaxed text-gray-600">
+          {message}
+        </p>
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             ref={cancelRef}

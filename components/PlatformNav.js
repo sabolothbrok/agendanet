@@ -48,7 +48,7 @@ export default function PlatformNav({ adminName, current }) {
               href={`/platform${href}`}
               className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium ${
                 isActive(current, href)
-                  ? "bg-gray-900 text-white"
+                  ? "nav-link-active"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >
@@ -76,12 +76,12 @@ export default function PlatformNav({ adminName, current }) {
               href={`/platform${href}`}
               aria-label={label}
               aria-current={isActive(current, href) ? "page" : undefined}
-              className={`flex min-h-[3.25rem] flex-col items-center justify-center py-2 ${
-                isActive(current, href) ? "text-gray-900" : "text-gray-500"
+              className={`flex min-h-[3.25rem] flex-col items-center justify-center px-1 py-1.5 ${
+                isActive(current, href) ? "nav-icon-active" : "text-gray-500"
               }`}
             >
-              <Icon size={22} strokeWidth={isActive(current, href) ? 2.25 : 1.75} />
-              <span className="sr-only">{label}</span>
+              <Icon size={20} strokeWidth={isActive(current, href) ? 2.25 : 1.75} />
+              <span className="nav-bottom-label">{label === "Nuevo negocio" ? "Nuevo" : label}</span>
             </Link>
           ))}
         </div>
