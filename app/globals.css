@@ -149,6 +149,46 @@ body {
   flex-shrink: 0;
 }
 
+.input-time {
+  display: block;
+  width: 100%;
+  max-width: 7.75rem;
+  min-width: 0;
+  padding: 0.4rem 0.45rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  field-sizing: content;
+}
+
+input[type="time"].input-time::-webkit-datetime-edit {
+  padding: 0;
+  min-width: 0;
+}
+
+input[type="time"].input-time::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+input[type="time"].input-time::-webkit-datetime-edit-hour-field,
+input[type="time"].input-time::-webkit-datetime-edit-minute-field,
+input[type="time"].input-time::-webkit-datetime-edit-ampm-field,
+input[type="time"].input-time::-webkit-datetime-edit-text {
+  padding: 0 0.05rem;
+}
+
+input[type="time"].input-time::-webkit-calendar-picker-indicator {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+input[type="time"].input-time::-webkit-date-and-time-value {
+  text-align: left;
+  min-width: 0;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

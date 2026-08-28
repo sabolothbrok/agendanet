@@ -143,44 +143,56 @@ export default function BusinessSettingsForm({ slug, business }) {
               {days.map((day) => (
                 <div
                   key={day.weekday}
-                  className="rounded-lg border border-gray-100 p-3 sm:flex sm:items-center sm:gap-3"
+                  className="min-w-0 rounded-lg border border-gray-100 p-3 sm:flex sm:items-center sm:gap-3"
                 >
-                  <label className="flex min-w-[8.5rem] items-center gap-2 text-sm font-medium text-gray-900">
+                  <label className="flex min-w-0 items-center gap-2 text-sm font-medium text-gray-900 sm:w-32 sm:shrink-0">
                     <input
                       type="checkbox"
                       name={`day_${day.weekday}_open`}
                       checked={day.isOpen}
                       onChange={(e) => updateDay(day.weekday, { isOpen: e.target.checked })}
-                      className="h-4 w-4"
+                      className="h-4 w-4 shrink-0"
                     />
                     {day.label}
                   </label>
-                  <div className="mt-2 grid grid-cols-2 gap-2 sm:mt-0 sm:flex-1">
-                    <input
-                      name={day.isOpen ? `day_${day.weekday}_open_hour` : undefined}
-                      type="time"
-                      required={day.isOpen}
-                      disabled={!day.isOpen}
-                      value={day.openHour}
-                      onChange={(e) => updateDay(day.weekday, { openHour: e.target.value })}
-                      className="input"
-                    />
-                    <input
-                      name={day.isOpen ? `day_${day.weekday}_close_hour` : undefined}
-                      type="time"
-                      required={day.isOpen}
-                      disabled={!day.isOpen}
-                      value={day.closeHour}
-                      onChange={(e) => updateDay(day.weekday, { closeHour: e.target.value })}
-                      className="input"
-                    />
-                    {!day.isOpen && (
-                      <>
-                        <input type="hidden" name={`day_${day.weekday}_open_hour`} value={day.openHour} />
-                        <input type="hidden" name={`day_${day.weekday}_close_hour`} value={day.closeHour} />
-                      </>
-                    )}
+                  <div
+                    className={`mt-2 grid min-w-0 grid-cols-2 gap-x-2 gap-y-1 sm:mt-0 sm:flex-1 ${
+                      day.isOpen ? "" : "opacity-50"
+                    }`}
+                  >
+                    <label className="flex min-w-0 flex-col gap-1">
+                      <span className="text-xs text-gray-500">Apertura</span>
+                      <input
+                        name={day.isOpen ? `day_${day.weekday}_open_hour` : undefined}
+                        type="time"
+                        lang="es-CR"
+                        required={day.isOpen}
+                        disabled={!day.isOpen}
+                        value={day.openHour}
+                        onChange={(e) => updateDay(day.weekday, { openHour: e.target.value })}
+                        className="input input-time"
+                      />
+                    </label>
+                    <label className="flex min-w-0 flex-col gap-1">
+                      <span className="text-xs text-gray-500">Cierre</span>
+                      <input
+                        name={day.isOpen ? `day_${day.weekday}_close_hour` : undefined}
+                        type="time"
+                        lang="es-CR"
+                        required={day.isOpen}
+                        disabled={!day.isOpen}
+                        value={day.closeHour}
+                        onChange={(e) => updateDay(day.weekday, { closeHour: e.target.value })}
+                        className="input input-time"
+                      />
+                    </label>
                   </div>
+                  {!day.isOpen && (
+                    <>
+                      <input type="hidden" name={`day_${day.weekday}_open_hour`} value={day.openHour} />
+                      <input type="hidden" name={`day_${day.weekday}_close_hour`} value={day.closeHour} />
+                    </>
+                  )}
                 </div>
               ))}
             </div>
