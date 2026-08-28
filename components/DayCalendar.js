@@ -91,12 +91,18 @@ function SlotCell({
     const apt = status.data;
     const isOwn =
       mode === "customer" && (apt.is_mine || apt.customer_id === currentCustomerId);
-    const label =
-      mode === "admin"
-        ? apt.customer_name || "Reservado"
-        : isOwn
-          ? "Tu reserva"
-          : "Ocupado";
+    if (mode === "customer" && !isOwn) {
+      return (
+        <div className="slot-cell slot-blocked slot-cell-stack h-full">
+          <p className="font-medium text-rose-900">No Disponible</p>
+          <p className="text-rose-700/80">
+            {formatTime(apt.start_at)} – {formatTime(apt.end_at)}
+          </p>
+        </div>
+      );
+    }
+
+    const label = mode === "admin" ? apt.customer_name || "Reservado" : "Tu reserva";
 
     return (
       <div
