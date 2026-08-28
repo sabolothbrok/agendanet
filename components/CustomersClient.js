@@ -75,7 +75,8 @@ export default function CustomersClient({ slug, customers: initial }) {
   async function remove(id) {
     const ok = await confirm({
       title: "Eliminar cliente",
-      message: "El cliente perderá acceso a la app. Esta acción no se puede deshacer.",
+      message:
+        "El cliente perderá el acceso. Se eliminarán sus citas, el horario quedará libre y desaparecerá de notificaciones. Esta acción no se puede deshacer.",
       confirmLabel: "Eliminar",
       cancelLabel: "Volver",
     });

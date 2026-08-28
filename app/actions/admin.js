@@ -30,7 +30,7 @@ import {
   rejectAppointment,
 } from "@/lib/queries";
 import { getSession } from "@/lib/session";
-import { formatDateShort, formatTime, normalizeBusinessTime, parseBusinessMinutes } from "@/lib/utils";
+import { formatDateShort, formatPhone, formatTime, normalizeBusinessTime, parseBusinessMinutes } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
 async function guard(slug) {
@@ -127,8 +127,29 @@ export async function adminGenerateInvite(slug) {
 export async function adminDeleteCustomer(slug, customerId) {
   const auth = await guard(slug);
   if (auth.error) return { error: "No autorizado" };
-  await deleteCustomer(customerId, auth.business.id);
+
+  const customer = await deleteCustomer(customerId, auth.business.id);
+  if (!customer) return { error: "El cliente ya no existe." };
+
+  const label = customer.name || formatPhone(customer.phone) || "Un cliente";
+  const admins = await listAdmins(auth.business.id);
+  for (const admin of admins) {
+    await createNotification({
+      businessId: auth.business.id,
+      recipientRole: "admin",
+      recipientId: admin.id,
+      type: "customer",
+      title: "Cliente eliminado",
+      body: `${label} fue eliminado. Sus citas se cancelaron y el horario quedó libre.`,
+    });
+  }
+
   revalidatePath(`/b/${slug}/admin/customers`);
+  revalidatePath(`/b/${slug}/admin`);
+  revalidatePath(`/b/${slug}/admin/calendar`);
+  revalidatePath(`/b/${slug}/admin/reports`);
+  revalidatePath(`/b/${slug}/app`);
+  revalidatePath(`/b/${slug}/app/reservations`);
   return { success: true };
 }
 
