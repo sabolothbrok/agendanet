@@ -174,8 +174,7 @@ export default function BookingClient({
             </p>
             {business.require_booking_approval && (
               <p className="mt-2 text-amber-800">
-                El negocio debe aprobar esta solicitud. El horario sigue disponible para
-                otras personas hasta que te confirmen.
+                El negocio debe aprobar esta solicitud.
               </p>
             )}
           </div>
