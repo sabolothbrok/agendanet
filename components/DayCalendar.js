@@ -96,7 +96,7 @@ function SlotCell({
         ? apt.customer_name || "Reservado"
         : isOwn
           ? "Tu reserva"
-          : "Reservado";
+          : "Ocupado";
 
     return (
       <div
