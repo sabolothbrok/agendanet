@@ -1602,14 +1602,13 @@ body {
 
 .landing-phone-status-icons {
   display: flex;
-  width: 3.35rem;
+  width: 2.4rem;
   align-items: center;
   justify-content: flex-end;
   gap: 0.22rem;
   color: #111827;
 }
 
-.landing-phone-status-signal,
 .landing-phone-status-wifi,
 .landing-phone-status-battery {
   display: block;
@@ -1617,7 +1616,6 @@ body {
   fill: currentColor;
 }
 
-.landing-phone-status-signal { width: 0.95rem; height: 0.68rem; }
 .landing-phone-status-wifi { width: 0.88rem; height: 0.66rem; }
 .landing-phone-status-battery { width: 1.4rem; height: 0.68rem; }
 

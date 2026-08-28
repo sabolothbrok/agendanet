@@ -13,12 +13,6 @@ export default function LandingPhoneFrame({ children, compact = false }) {
               <span className="landing-phone-island-lens" />
             </div>
             <span className="landing-phone-status-icons">
-              <svg viewBox="0 0 17 12" className="landing-phone-status-signal" aria-hidden>
-                <rect x="0" y="8" width="2.4" height="4" rx="0.6" />
-                <rect x="4.2" y="5.5" width="2.4" height="6.5" rx="0.6" />
-                <rect x="8.4" y="3" width="2.4" height="9" rx="0.6" />
-                <rect x="12.6" y="0" width="2.4" height="12" rx="0.6" />
-              </svg>
               <svg viewBox="0 0 16 12" className="landing-phone-status-wifi" aria-hidden>
                 <path
                   d="M1.2 4.4a9.2 9.2 0 0 1 13.6 0M3.6 6.8a5.8 5.8 0 0 1 8.8 0"
