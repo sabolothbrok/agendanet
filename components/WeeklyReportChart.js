@@ -76,7 +76,11 @@ export default function WeeklyReportChart({
               <strong className="font-semibold text-gray-900">{peakDay.label}</strong> con{" "}
               {peakDay.value}% de ocupación
               {peakDay.appointmentCount != null && peakDay.appointmentCount > 0 && (
-                <> · {peakDay.appointmentCount} citas</>
+                <>
+                  {" "}
+                  · {peakDay.appointmentCount} cita
+                  {peakDay.appointmentCount === 1 ? "" : "s"}
+                </>
               )}
             </p>
           </>
