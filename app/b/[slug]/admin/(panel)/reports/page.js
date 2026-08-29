@@ -26,7 +26,7 @@ export default async function AdminReportsPage({ params }) {
         {
           icon: CalendarCheck,
           value: String(report.totalAppointments),
-          label: "citas en la semana",
+          label: `${report.totalAppointments === 1 ? "cita" : "citas"} en la semana`,
         },
         {
           icon: XCircle,
@@ -95,7 +95,8 @@ export default async function AdminReportsPage({ params }) {
                     </span>
                   </p>
                   <p className="mt-1 text-gray-600">
-                    {day.value}% ocupación · {day.appointmentCount} citas · {day.bookedMinutes} min
+                    {day.value}% ocupación · {day.appointmentCount} cita
+                    {day.appointmentCount === 1 ? "" : "s"} · {day.bookedMinutes} min
                   </p>
                 </li>
               ))}
