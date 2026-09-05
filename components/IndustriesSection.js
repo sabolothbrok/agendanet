@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import {
   Calendar,
@@ -342,12 +341,6 @@ export default function IndustriesSection() {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="landing-industries-cta-wrap">
-          <Link href="#precios" className="landing-btn-primary landing-industries-cta">
-            Ver planes para tu negocio
-          </Link>
         </div>
       </div>
     </section>

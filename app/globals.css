@@ -3394,16 +3394,6 @@ input[type="time"].input-time::-webkit-date-and-time-value {
   word-break: break-word;
 }
 
-.landing-industries-cta-wrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.75rem;
-}
-
-.landing-industries-cta {
-  width: min(100%, 20rem);
-}
-
 .landing-industries-stats {
   display: grid;
   grid-template-columns: 1fr;
