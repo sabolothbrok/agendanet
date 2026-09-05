@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import {
   Calendar,
@@ -260,7 +259,7 @@ export default function IndustriesSection() {
   const active = INDUSTRIES.find((i) => i.id === activeId) ?? INDUSTRIES[0];
 
   return (
-    <section className="landing-band">
+    <section>
       <div className="landing-container landing-pad">
         <div className="landing-head">
           <p className="landing-tag">Industrias</p>
@@ -342,12 +341,6 @@ export default function IndustriesSection() {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="landing-industries-cta-wrap">
-          <Link href="#precios" className="landing-btn-primary landing-industries-cta">
-            Ver planes para tu negocio
-          </Link>
         </div>
       </div>
     </section>

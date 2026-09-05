@@ -504,7 +504,14 @@ export default function MarketingHome() {
         </Reveal>
         <div className="landing-features">
           {FEATURES.map(({ icon: Icon, title, text }, i) => (
-            <Reveal key={title} as="article" className="landing-feature card" delay={(i % 3) * 0.08} y={16}>
+            <Reveal
+              key={title}
+              as="article"
+              className="landing-feature card"
+              delay={(i % 3) * 0.08}
+              y={16}
+              whileHover={{ y: -4, transition: { duration: 0.2, ease: "easeOut" } }}
+            >
               <span className="landing-feature-icon">
                 <Icon className="h-5 w-5" />
               </span>
@@ -526,7 +533,14 @@ export default function MarketingHome() {
         </Reveal>
         <ol className="landing-steps">
           {STEPS.map((step, i) => (
-            <Reveal key={step.n} as="li" className="landing-step card" delay={i * 0.1} y={16}>
+            <Reveal
+              key={step.n}
+              as="li"
+              className="landing-step card"
+              delay={i * 0.1}
+              y={16}
+              whileHover={{ y: -4, transition: { duration: 0.2, ease: "easeOut" } }}
+            >
               <span className="landing-step-num" aria-hidden="true">
                 {step.n}
               </span>
@@ -557,6 +571,7 @@ export default function MarketingHome() {
                 className={`landing-plan card ${plan.featured ? "landing-plan--featured" : ""}`}
                 delay={i * 0.08}
                 y={16}
+                whileHover={{ y: -4, transition: { duration: 0.2, ease: "easeOut" } }}
               >
                 {plan.featured && <span className="landing-plan-tag">Más popular</span>}
                 <p className="text-[0.6875rem] font-semibold uppercase tracking-wide text-gray-500">
