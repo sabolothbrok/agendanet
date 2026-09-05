@@ -1,6 +1,13 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import PlatformNav from "@/components/PlatformNav";
 
-export default function PlatformShell({ adminName, current, children }) {
+export default function PlatformShell({ adminName, children }) {
+  const pathname = usePathname();
+  const base = "/platform";
+  const current = pathname.startsWith(base) ? pathname.slice(base.length) || "/" : pathname;
+
   return (
     <div className="app-shell min-h-screen w-full min-w-0 overflow-x-clip md:flex">
       <PlatformNav adminName={adminName} current={current} />

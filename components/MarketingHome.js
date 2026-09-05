@@ -1,7 +1,9 @@
 import Link from "next/link";
+import AppIcon from "@/components/AppIcon";
 import IndustriesSection from "@/components/IndustriesSection";
 import LandingNav from "@/components/LandingNav";
 import LandingPhoneFrame from "@/components/LandingPhoneFrame";
+import Reveal from "@/components/Reveal";
 import WeeklyReportChart from "@/components/WeeklyReportChart";
 import {
   Banknote,
@@ -168,7 +170,7 @@ function AdminSlot({ type, label }) {
 function ExperienceSection({ tag, title, desc, items, visual, reverse = false, cta }) {
   return (
     <div className={`landing-experience ${reverse ? "landing-experience--reverse" : ""}`}>
-      <div className="landing-experience-copy">
+      <Reveal className="landing-experience-copy" y={16}>
         <SectionHead tag={tag} title={title} desc={desc} align="left" />
         <ul className="landing-checklist">
           {items.map((item) => (
@@ -180,8 +182,10 @@ function ExperienceSection({ tag, title, desc, items, visual, reverse = false, c
             {cta.label}
           </Link>
         )}
-      </div>
-      <div className="landing-experience-visual">{visual}</div>
+      </Reveal>
+      <Reveal className="landing-experience-visual" y={24} delay={0.1}>
+        {visual}
+      </Reveal>
     </div>
   );
 }
@@ -423,7 +427,7 @@ export default function MarketingHome() {
       <section className="landing-hero">
         <div className="landing-hero-bg" aria-hidden />
         <div className="landing-container landing-hero-grid">
-          <div className="landing-hero-copy">
+          <Reveal as="div" className="landing-hero-copy" y={18} duration={0.7}>
             <p className="landing-eyebrow">Software de reservas para negocios locales</p>
             <h1 className="landing-h1">
               Citas, calendario y clientes en una sola plataforma
@@ -450,10 +454,10 @@ export default function MarketingHome() {
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="landing-hero-visual">
+          </Reveal>
+          <Reveal as="div" className="landing-hero-visual" y={24} delay={0.15} duration={0.7}>
             <HeroGraphic />
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -491,40 +495,44 @@ export default function MarketingHome() {
       </section>
 
       <section id="funciones" className="landing-container landing-pad">
-        <SectionHead
-          tag="Funciones"
-          title="Qué incluye la plataforma"
-          desc="Capacidades para operar citas, clientes y varios locales sin herramientas extra."
-        />
+        <Reveal y={16}>
+          <SectionHead
+            tag="Funciones"
+            title="Qué incluye la plataforma"
+            desc="Capacidades para operar citas, clientes y varios locales sin herramientas extra."
+          />
+        </Reveal>
         <div className="landing-features">
-          {FEATURES.map(({ icon: Icon, title, text }) => (
-            <article key={title} className="landing-feature card">
+          {FEATURES.map(({ icon: Icon, title, text }, i) => (
+            <Reveal key={title} as="article" className="landing-feature card" delay={(i % 3) * 0.08} y={16}>
               <span className="landing-feature-icon">
                 <Icon className="h-5 w-5" />
               </span>
-              <h3 className="mt-4 font-semibold text-gray-900">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-gray-600">{text}</p>
-            </article>
+              <h3 className="mt-4 font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{text}</p>
+            </Reveal>
           ))}
         </div>
       </section>
 
       <section id="como-funciona" className="landing-band">
         <div className="landing-container landing-pad">
-        <SectionHead
-          tag="¿Cómo funciona?"
-          title="Tres pasos para empezar hoy"
-          desc="Configuras, compartes el enlace y recibes reservas el mismo día."
-        />
+        <Reveal y={16}>
+          <SectionHead
+            tag="¿Cómo funciona?"
+            title="Tres pasos para empezar hoy"
+            desc="Configuras, compartes el enlace y recibes reservas el mismo día."
+          />
+        </Reveal>
         <ol className="landing-steps">
-          {STEPS.map((step) => (
-            <li key={step.n} className="landing-step card">
+          {STEPS.map((step, i) => (
+            <Reveal key={step.n} as="li" className="landing-step card" delay={i * 0.1} y={16}>
               <span className="landing-step-num" aria-hidden="true">
                 {step.n}
               </span>
               <h3 className="landing-step-title">{step.title}</h3>
               <p className="landing-step-text">{step.text}</p>
-            </li>
+            </Reveal>
           ))}
         </ol>
         </div>
@@ -534,16 +542,21 @@ export default function MarketingHome() {
 
       <section id="precios" className="landing-band">
         <div className="landing-container landing-pad">
-          <SectionHead
-            tag="Precios"
-            title="Planes (próximamente)"
-            desc="Cobros y límites por plan aún no están activos. Hoy todos los negocios usan la plataforma completa, sin tarjeta."
-          />
+          <Reveal y={16}>
+            <SectionHead
+              tag="Precios"
+              title="Planes (próximamente)"
+              desc="Cobros y límites por plan aún no están activos. Hoy todos los negocios usan la plataforma completa, sin tarjeta."
+            />
+          </Reveal>
           <div className="landing-pricing">
-            {PLANS.map((plan) => (
-              <article
+            {PLANS.map((plan, i) => (
+              <Reveal
                 key={plan.name}
+                as="article"
                 className={`landing-plan card ${plan.featured ? "landing-plan--featured" : ""}`}
+                delay={i * 0.08}
+                y={16}
               >
                 {plan.featured && <span className="landing-plan-tag">Más popular</span>}
                 <p className="text-[0.6875rem] font-semibold uppercase tracking-wide text-gray-500">
@@ -561,14 +574,14 @@ export default function MarketingHome() {
                   </li>
                 ))}
                 </ul>
-              </article>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       <section className="landing-cta">
-        <div className="landing-container landing-cta-inner">
+        <Reveal className="landing-container landing-cta-inner" y={16}>
           <p className="landing-cta-eyebrow">Listo para modernizar tus reservas</p>
           <h2 className="landing-cta-title">
             Menos mensajes. Menos errores. Más citas confirmadas.
@@ -585,14 +598,14 @@ export default function MarketingHome() {
               Iniciar sesión
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="landing-footer">
         <div className="landing-container landing-footer-inner">
           <div className="landing-footer-brand">
             <div className="landing-footer-logo">
-              <Calendar className="h-5 w-5" aria-hidden />
+              <AppIcon className="h-7 w-7 shrink-0" />
               <span>AgendaNet</span>
             </div>
             <p className="landing-footer-desc">

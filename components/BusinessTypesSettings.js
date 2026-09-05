@@ -83,8 +83,8 @@ export default function BusinessTypesSettings({ types: initial }) {
     <div className="card space-y-4 p-4 sm:p-6">
       {dialog}
       <div>
-        <h2 className="font-semibold text-gray-900">Tipos de negocio</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Tipos de negocio</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Opciones disponibles al crear un negocio. Puedes agregar las que necesites
           (spa, veterinaria, gimnasio, etc.).
         </p>
@@ -92,7 +92,7 @@ export default function BusinessTypesSettings({ types: initial }) {
 
       <form onSubmit={addType} className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <label className="mb-1 block text-sm text-gray-600">Nuevo tipo</label>
+          <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">Nuevo tipo</label>
           <input
             name="label"
             required
@@ -107,7 +107,7 @@ export default function BusinessTypesSettings({ types: initial }) {
         </button>
       </form>
 
-      <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100">
+      <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         {types.map((type) => (
           <li key={type.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             {editingId === type.id ? (
@@ -138,21 +138,21 @@ export default function BusinessTypesSettings({ types: initial }) {
             ) : (
               <>
                 <div>
-                  <p className="font-medium text-gray-900">{type.label}</p>
-                  <p className="text-xs text-gray-500">{type.slug}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{type.label}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{type.slug}</p>
                 </div>
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={() => startEdit(type)}
-                    className="text-sm text-gray-700 hover:underline"
+                    className="text-sm text-gray-700 hover:underline dark:text-gray-300"
                   >
                     Editar
                   </button>
                   <button
                     type="button"
                     onClick={() => remove(type)}
-                    className="text-sm text-red-600 hover:underline"
+                    className="text-sm text-red-600 hover:underline dark:text-red-400"
                   >
                     Eliminar
                   </button>
@@ -162,7 +162,7 @@ export default function BusinessTypesSettings({ types: initial }) {
           </li>
         ))}
         {types.length === 0 && (
-          <li className="px-4 py-6 text-center text-sm text-gray-500">
+          <li className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
             Agrega al menos un tipo de negocio.
           </li>
         )}

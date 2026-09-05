@@ -9,6 +9,7 @@ import {
   createSpaceBlock,
   deleteCustomer,
   deleteSpaceBlock,
+  getAppointmentById,
   getCalendarData,
   getActiveSpace,
   listAdmins,
@@ -16,6 +17,8 @@ import {
   listNotifications,
   listServices,
   listSpaces,
+  rescheduleAppointment,
+  searchCustomers,
   markNotificationRead,
   toggleCustomerPremium,
   updateBusinessSettings,
@@ -30,7 +33,18 @@ import {
   rejectAppointment,
 } from "@/lib/queries";
 import { getSession } from "@/lib/session";
-import { formatDateShort, formatPhone, formatTime, normalizeBusinessTime, parseBusinessMinutes } from "@/lib/utils";
+import {
+  combineDateAndTime,
+  addMinutes,
+  fitsWithinBusinessHours,
+  formatDateShort,
+  formatPhone,
+  formatTime,
+  isSlotStartInPast,
+  normalizeBusinessTime,
+  parseBusinessMinutes,
+  resolveHours,
+} from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 
 async function guard(slug) {
@@ -112,6 +126,43 @@ export async function adminToggleBlock(slug, { spaceId, date, time, duration, bl
   return { success: true };
 }
 
+export async function adminRescheduleAppointment(slug, appointmentId, { spaceId, date, time }) {
+  const auth = await guard(slug);
+  if (auth.error) return { error: "No autorizado" };
+
+  if (isSlotStartInPast(date, time)) {
+    return { error: "Ese horario ya pasó." };
+  }
+
+  const space = await getActiveSpace(auth.business.id, spaceId);
+  if (!space) return { error: "Espacio inválido." };
+
+  const appointment = await getAppointmentById(appointmentId, auth.business.id);
+  if (!appointment) return { error: "Cita no encontrada." };
+
+  const durationMs = new Date(appointment.end_at) - new Date(appointment.start_at);
+  const startAt = combineDateAndTime(date, time);
+  const endAt = new Date(startAt.getTime() + durationMs);
+
+  const hours = resolveHours(auth.business, date);
+  if (hours.isClosed || !fitsWithinBusinessHours(startAt, endAt, hours.openHour, hours.closeHour, date)) {
+    return { error: "Ese horario está fuera del horario de atención." };
+  }
+
+  const result = await rescheduleAppointment(appointmentId, auth.business.id, {
+    spaceId,
+    startAt,
+    endAt,
+  });
+  if (result.error === "blocked") return { error: "Ese horario está marcado como no disponible." };
+  if (result.error === "conflict") return { error: "Ya hay una cita en ese horario." };
+  if (result.error) return { error: "No se pudo reprogramar la cita." };
+
+  revalidatePath(`/b/${slug}/admin/calendar`);
+  revalidatePath(`/b/${slug}/app`);
+  return { success: true };
+}
+
 export async function adminGenerateInvite(slug) {
   const auth = await guard(slug);
   if (auth.error) return { error: "No autorizado" };
@@ -122,6 +173,15 @@ export async function adminGenerateInvite(slug) {
     link: `${base}/b/${slug}/join?token=${invite.token}`,
     expiresAt: invite.expiresAt,
   };
+}
+
+export async function adminSearchCustomers(slug, query) {
+  const auth = await guard(slug);
+  if (auth.error) return { error: "No autorizado" };
+  if (!query || query.trim().length < 2) return { customers: [] };
+
+  const customers = await searchCustomers(auth.business.id, query.trim());
+  return { customers };
 }
 
 export async function adminDeleteCustomer(slug, customerId) {

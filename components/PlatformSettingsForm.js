@@ -23,14 +23,14 @@ export default function PlatformSettingsForm({ profile }) {
   return (
     <form onSubmit={handleSubmit} className="card max-w-xl space-y-4 p-4 sm:p-6">
       <div>
-        <h2 className="font-semibold text-gray-900">Tu perfil</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Tu perfil</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Datos del administrador general de la plataforma.
         </p>
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-gray-600">Nombre</label>
+        <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">Nombre</label>
         <input
           name="name"
           required
@@ -41,14 +41,14 @@ export default function PlatformSettingsForm({ profile }) {
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-gray-600">Teléfono</label>
+        <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">Teléfono</label>
         <input
           type="text"
           readOnly
           value={formatPhone(profile.phone)}
-          className="input bg-gray-50 text-gray-500"
+          className="input bg-gray-50 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
         />
-        <p className="mt-1 text-xs text-gray-500">El teléfono no se puede cambiar.</p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">El teléfono no se puede cambiar.</p>
       </div>
 
       <button type="submit" disabled={isPending} className="btn btn-primary w-full sm:w-auto">

@@ -3,8 +3,8 @@
 export default function ErrorFallback({ reset, title = "Algo salió mal" }) {
   return (
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h1>
+      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
         Intenta de nuevo. Si el problema continúa, recarga la página o vuelve a iniciar sesión.
       </p>
       {typeof reset === "function" && (

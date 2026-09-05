@@ -4,12 +4,13 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { adminSaveSettings } from "@/app/actions/admin";
 import { useToast } from "@/hooks/useToast";
+import Spinner from "@/components/Spinner";
 import { WEEKDAY_FULL_LABELS, normalizeBusinessTime } from "@/lib/utils";
 
 function Toggle({ name, label, defaultChecked }) {
   return (
-    <label className="flex items-center justify-between gap-4 rounded-lg border border-gray-100 px-4 py-3 text-sm">
-      <span className="text-gray-700">{label}</span>
+    <label className="flex items-center justify-between gap-4 rounded-lg border border-gray-100 px-4 py-3 text-sm dark:border-gray-800">
+      <span className="text-gray-700 dark:text-gray-300">{label}</span>
       <input type="checkbox" name={name} defaultChecked={defaultChecked} className="ui-switch" />
     </label>
   );
@@ -68,15 +69,15 @@ export default function BusinessSettingsForm({ slug, business }) {
   return (
     <form onSubmit={handleSubmit} className="mt-6 max-w-xl space-y-6">
       <div className="card space-y-4 p-4 sm:p-6">
-        <h2 className="font-semibold text-gray-900">Horario</h2>
-        <p className="text-sm text-gray-600">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Horario</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Elige un horario para toda la semana o define cada día. El calendario de admin y
           clientes se ajusta a estas horas.
         </p>
 
         <fieldset className="space-y-2">
-          <legend className="mb-1 text-sm text-gray-600">Tipo de horario</legend>
-          <label className="choice-card flex items-start gap-3 rounded-lg border border-gray-100 px-4 py-3 text-sm">
+          <legend className="mb-1 text-sm text-gray-600 dark:text-gray-400">Tipo de horario</legend>
+          <label className="choice-card flex items-start gap-3 rounded-lg border border-gray-100 px-4 py-3 text-sm dark:border-gray-800">
             <input
               type="radio"
               name="schedule_mode"
@@ -86,11 +87,11 @@ export default function BusinessSettingsForm({ slug, business }) {
               className="mt-0.5 h-4 w-4"
             />
             <span>
-              <span className="block font-medium text-gray-900">El mismo horario toda la semana</span>
-              <span className="text-gray-500">Un horario de apertura y cierre para todos los días.</span>
+              <span className="block font-medium text-gray-900 dark:text-gray-100">El mismo horario toda la semana</span>
+              <span className="text-gray-500 dark:text-gray-400">Un horario de apertura y cierre para todos los días.</span>
             </span>
           </label>
-          <label className="choice-card flex items-start gap-3 rounded-lg border border-gray-100 px-4 py-3 text-sm">
+          <label className="choice-card flex items-start gap-3 rounded-lg border border-gray-100 px-4 py-3 text-sm dark:border-gray-800">
             <input
               type="radio"
               name="schedule_mode"
@@ -100,8 +101,8 @@ export default function BusinessSettingsForm({ slug, business }) {
               className="mt-0.5 h-4 w-4"
             />
             <span>
-              <span className="block font-medium text-gray-900">Horario por día</span>
-              <span className="text-gray-500">
+              <span className="block font-medium text-gray-900 dark:text-gray-100">Horario por día</span>
+              <span className="text-gray-500 dark:text-gray-400">
                 Cada día puede abrir, cerrar o tener horas distintas.
               </span>
             </span>
@@ -111,7 +112,7 @@ export default function BusinessSettingsForm({ slug, business }) {
         {scheduleMode === "weekly" ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm text-gray-600">Apertura</label>
+              <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">Apertura</label>
               <input
                 name="open_hour"
                 type="time"
@@ -121,7 +122,7 @@ export default function BusinessSettingsForm({ slug, business }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm text-gray-600">Cierre</label>
+              <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">Cierre</label>
               <input
                 name="close_hour"
                 type="time"
@@ -135,7 +136,7 @@ export default function BusinessSettingsForm({ slug, business }) {
           <>
             <input type="hidden" name="open_hour" value={openHour} />
             <input type="hidden" name="close_hour" value={closeHour} />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Al activar este modo por primera vez, cada día parte de {weeklyHint}. Desmarca un
               día para marcarlo como cerrado.
             </p>
@@ -143,9 +144,9 @@ export default function BusinessSettingsForm({ slug, business }) {
               {days.map((day) => (
                 <div
                   key={day.weekday}
-                  className="min-w-0 rounded-lg border border-gray-100 p-3 sm:flex sm:items-center sm:gap-3"
+                  className="min-w-0 rounded-lg border border-gray-100 p-3 sm:flex sm:items-center sm:gap-3 dark:border-gray-800"
                 >
-                  <label className="flex min-w-0 items-center gap-2 text-sm font-medium text-gray-900 sm:w-32 sm:shrink-0">
+                  <label className="flex min-w-0 items-center gap-2 text-sm font-medium text-gray-900 sm:w-32 sm:shrink-0 dark:text-gray-100">
                     <input
                       type="checkbox"
                       name={`day_${day.weekday}_open`}
@@ -161,7 +162,7 @@ export default function BusinessSettingsForm({ slug, business }) {
                     }`}
                   >
                     <label className="flex min-w-0 flex-col gap-1">
-                      <span className="text-xs text-gray-500">Apertura</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Apertura</span>
                       <input
                         name={day.isOpen ? `day_${day.weekday}_open_hour` : undefined}
                         type="time"
@@ -174,7 +175,7 @@ export default function BusinessSettingsForm({ slug, business }) {
                       />
                     </label>
                     <label className="flex min-w-0 flex-col gap-1">
-                      <span className="text-xs text-gray-500">Cierre</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Cierre</span>
                       <input
                         name={day.isOpen ? `day_${day.weekday}_close_hour` : undefined}
                         type="time"
@@ -200,7 +201,7 @@ export default function BusinessSettingsForm({ slug, business }) {
         )}
 
         <div>
-          <label className="mb-1 block text-sm text-gray-600">
+          <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
             Intervalo del calendario (minutos)
           </label>
           <select name="slot_minutes" defaultValue={String(slotMinutes)} className="input">
@@ -212,9 +213,9 @@ export default function BusinessSettingsForm({ slug, business }) {
       </div>
 
       <div className="card space-y-4 p-4 sm:p-6">
-        <h2 className="font-semibold text-gray-900">Citas</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Citas</h2>
         <div>
-          <label className="mb-1 block text-sm text-gray-600">
+          <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
             Horas mínimas antes para que el cliente modifique
           </label>
           <input
@@ -225,7 +226,7 @@ export default function BusinessSettingsForm({ slug, business }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-gray-600">
+          <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
             Duración mínima de cita (minutos)
           </label>
           <input
@@ -234,7 +235,7 @@ export default function BusinessSettingsForm({ slug, business }) {
             defaultValue={business.min_appointment_minutes}
             className="input"
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Debe ser un múltiplo del intervalo del calendario. Un servicio más largo
             puede ocupar varios intervalos.
           </p>
@@ -249,7 +250,7 @@ export default function BusinessSettingsForm({ slug, business }) {
           label="Aprobar reservas de clientes"
           defaultChecked={Boolean(business.require_booking_approval)}
         />
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Si está activo, las reservas quedan pendientes hasta que las apruebes. Varios
           clientes pueden solicitar el mismo horario; al aprobar a uno, los demás ven en
           Mis reservas que el espacio ya no está disponible.
@@ -257,8 +258,8 @@ export default function BusinessSettingsForm({ slug, business }) {
       </div>
 
       <div className="card space-y-3 p-4 sm:p-6">
-        <h2 className="font-semibold text-gray-900">Notificaciones (internas)</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Notificaciones (internas)</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Los avisos aparecen en Inicio del panel admin. No se envían SMS ni correo.
         </p>
         <Toggle
@@ -274,6 +275,7 @@ export default function BusinessSettingsForm({ slug, business }) {
       </div>
 
       <button type="submit" disabled={isPending} className="btn btn-primary w-full sm:w-auto">
+        {isPending && <Spinner />}
         {isPending ? "Guardando..." : "Guardar configuración"}
       </button>
     </form>

@@ -16,8 +16,8 @@ export default async function ClientReservationsPage({ params }) {
 
   return (
     <>
-      <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Mis reservas</h1>
-      <p className="mt-1 text-sm text-gray-600 sm:text-base">
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Mis reservas</h1>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
         {auth.business.require_booking_approval
           ? "Solicitudes pendientes, citas confirmadas e historial"
           : "Activas primero, luego historial"}

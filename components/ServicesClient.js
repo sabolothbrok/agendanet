@@ -144,7 +144,7 @@ export default function ServicesClient({ slug, services: initial }) {
     <div className="space-y-6">
       {dialog}
       <div ref={formSectionRef} className="card p-4 sm:p-6">
-        <h2 className="font-semibold text-gray-900">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">
           {isEditing ? "Editar servicio" : "Agregar servicio"}
         </h2>
         <form ref={formRef} onSubmit={submit} className="mt-4 space-y-3">
@@ -181,7 +181,7 @@ export default function ServicesClient({ slug, services: initial }) {
             onInput={clearValidity}
             className="input"
           />
-          <label className="flex items-center gap-2 text-sm text-gray-600">
+          <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input
               type="checkbox"
               name="is_premium"
@@ -191,7 +191,7 @@ export default function ServicesClient({ slug, services: initial }) {
             Servicio premium (solo clientes premium)
           </label>
           {isEditing && (
-            <label className="flex items-center gap-2 text-sm text-gray-600">
+            <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <input
                 type="checkbox"
                 name="is_active"
@@ -224,11 +224,11 @@ export default function ServicesClient({ slug, services: initial }) {
           <div key={s.id} className="card p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-gray-900 dark:text-gray-100">
                   {s.name}
                   {s.is_premium && <PremiumBadge compact className="ml-1.5 align-middle" />}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {s.duration_minutes} min · {formatOptionalPrice(s.price)}
                 </p>
               </div>
@@ -257,7 +257,7 @@ export default function ServicesClient({ slug, services: initial }) {
           </div>
         ))}
         {services.length === 0 && (
-          <p className="card p-8 text-center text-gray-500">Sin servicios.</p>
+          <p className="card p-8 text-center text-gray-500 dark:text-gray-400">Sin servicios.</p>
         )}
       </div>
 
@@ -265,26 +265,26 @@ export default function ServicesClient({ slug, services: initial }) {
       <div className="card hidden md:block">
         <div className="table-scroll">
         <table className="w-full min-w-[560px] text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50">
+          <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Servicio</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Duración</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Precio</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Estado</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-600">Acciones</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Servicio</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Duración</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Precio</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Estado</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {services.map((s) => (
-              <tr key={s.id} className="border-b border-gray-100">
+              <tr key={s.id} className="border-b border-gray-100 dark:border-gray-800">
                 <td className="px-4 py-3">
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
                     {s.name}
                     {s.is_premium && <PremiumBadge className="ml-1.5 align-middle" />}
                   </p>
                 </td>
-                <td className="px-4 py-3 text-gray-600">{s.duration_minutes} min</td>
-                <td className="px-4 py-3 text-gray-600">{formatOptionalPrice(s.price)}</td>
+                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{s.duration_minutes} min</td>
+                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatOptionalPrice(s.price)}</td>
                 <td className="px-4 py-3">
                   <span className={`badge ${s.is_active ? "badge-success" : "badge-neutral"}`}>
                     {s.is_active ? "Activo" : "Inactivo"}
@@ -294,15 +294,15 @@ export default function ServicesClient({ slug, services: initial }) {
                   <button
                     type="button"
                     onClick={() => startEdit(s)}
-                    className="text-sm text-gray-700 hover:underline"
+                    className="text-sm text-gray-700 hover:underline dark:text-gray-300"
                   >
                     Editar
                   </button>
-                  <span className="mx-2 text-gray-300">|</span>
+                  <span className="mx-2 text-gray-300 dark:text-gray-600">|</span>
                   <button
                     type="button"
                     onClick={() => remove(s)}
-                    className="text-sm text-red-600 hover:underline"
+                    className="text-sm text-red-600 hover:underline dark:text-red-400"
                   >
                     Eliminar
                   </button>
@@ -313,11 +313,11 @@ export default function ServicesClient({ slug, services: initial }) {
         </table>
         </div>
         {services.length === 0 && (
-          <p className="p-8 text-center text-gray-500">Sin servicios.</p>
+          <p className="p-8 text-center text-gray-500 dark:text-gray-400">Sin servicios.</p>
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

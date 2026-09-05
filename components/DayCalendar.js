@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { motion } from "motion/react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   addMinutes,
@@ -86,7 +87,12 @@ function SlotCell({
   onToggleBlock,
   onCancelAppointment,
   onOpenPending,
+  onReschedule,
+  draggingId,
+  onDragStateChange,
 }) {
+  const [dragOver, setDragOver] = useState(false);
+
   if (status.type === "booked") {
     const apt = status.data;
     const isOwn =
@@ -94,8 +100,8 @@ function SlotCell({
     if (mode === "customer" && !isOwn) {
       return (
         <div className="slot-cell slot-blocked slot-cell-stack h-full">
-          <p className="font-medium text-rose-900">No Disponible</p>
-          <p className="text-rose-700/80">
+          <p className="font-medium text-rose-900 dark:text-rose-300">No Disponible</p>
+          <p className="text-rose-700/80 dark:text-rose-400/80">
             {formatTime(apt.start_at)} – {formatTime(apt.end_at)}
           </p>
         </div>
@@ -103,27 +109,39 @@ function SlotCell({
     }
 
     const label = mode === "admin" ? apt.customer_name || "Reservado" : "Tu reserva";
+    const canDrag = mode === "admin" && !!onReschedule && apt.status === "active";
 
     return (
       <div
+        draggable={canDrag}
+        onDragStart={
+          canDrag
+            ? (e) => {
+                e.dataTransfer.setData("text/plain", apt.id);
+                e.dataTransfer.effectAllowed = "move";
+                onDragStateChange?.(apt.id);
+              }
+            : undefined
+        }
+        onDragEnd={canDrag ? () => onDragStateChange?.(null) : undefined}
         className={`slot-cell slot-cell-stack h-full ${
           isOwn ? "slot-own" : "slot-booked"
-        }`}
+        } ${canDrag ? "slot-draggable" : ""} ${draggingId === apt.id ? "slot-dragging" : ""}`}
       >
-        <p className={`font-medium ${isOwn ? "text-gray-900" : "text-gray-800"}`}>
+        <p className={`font-medium ${isOwn ? "text-gray-900 dark:text-gray-100" : "text-gray-800 dark:text-gray-200"}`}>
           {label}
         </p>
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           {formatTime(apt.start_at)} – {formatTime(apt.end_at)}
         </p>
         {mode === "admin" && apt.services?.length > 0 && (
-          <p className="text-gray-500 break-words">{apt.services.map((s) => s.name).join(", ")}</p>
+          <p className="text-gray-500 dark:text-gray-400 break-words">{apt.services.map((s) => s.name).join(", ")}</p>
         )}
         {mode === "admin" && onCancelAppointment && (
           <button
             type="button"
             onClick={() => onCancelAppointment(apt.id)}
-            className="mt-1 text-xs text-red-600 hover:underline"
+            className="mt-1 text-xs text-red-600 hover:underline dark:text-red-400"
           >
             Cancelar
           </button>
@@ -132,7 +150,7 @@ function SlotCell({
           <button
             type="button"
             onClick={() => onOpenPending(status.pending)}
-            className="mt-1 text-xs font-medium text-amber-800 hover:underline"
+            className="mt-1 text-xs font-medium text-amber-800 hover:underline dark:text-amber-400"
           >
             {status.pending.length === 1
               ? "1 solicitud en conflicto"
@@ -151,10 +169,10 @@ function SlotCell({
         onClick={() => onOpenPending?.(status.data)}
         className="slot-cell slot-cell-stack slot-pending h-full"
       >
-        <p className="font-medium text-amber-950">
+        <p className="font-medium text-amber-950 dark:text-amber-300">
           {count} {count === 1 ? "solicitud" : "solicitudes"}
         </p>
-        <p className="text-amber-800/80">Pendiente de aprobación</p>
+        <p className="text-amber-800/80 dark:text-amber-400/80">Pendiente de aprobación</p>
       </button>
     );
   }
@@ -163,8 +181,8 @@ function SlotCell({
     const apt = status.data;
     return (
       <div className="slot-cell slot-cell-stack slot-pending h-full">
-        <p className="font-medium text-amber-950">Solicitud pendiente</p>
-        <p className="text-amber-800/80">
+        <p className="font-medium text-amber-950 dark:text-amber-300">Solicitud pendiente</p>
+        <p className="text-amber-800/80 dark:text-amber-400/80">
           {formatTime(apt.start_at)} – {formatTime(apt.end_at)}
         </p>
       </div>
@@ -176,8 +194,8 @@ function SlotCell({
 
     return (
       <div className="slot-cell slot-blocked slot-cell-stack h-full">
-        <p className="font-medium text-rose-900">No Disponible</p>
-        <p className="text-rose-700/80">
+        <p className="font-medium text-rose-900 dark:text-rose-300">No Disponible</p>
+        <p className="text-rose-700/80 dark:text-rose-400/80">
           {formatTime(block.start_at)} – {formatTime(block.end_at)}
         </p>
         {mode === "admin" && onToggleBlock && (
@@ -186,7 +204,7 @@ function SlotCell({
             onClick={() =>
               onToggleBlock({ spaceId, time, block: false, blockId: block.id })
             }
-            className="mt-1 text-xs font-medium text-rose-900 hover:underline"
+            className="mt-1 text-xs font-medium text-rose-900 hover:underline dark:text-rose-300"
           >
             Habilitar
           </button>
@@ -201,16 +219,18 @@ function SlotCell({
 
     return (
       <div className="slot-cell slot-unavailable slot-cell-stack h-full">
-        <p className="font-medium text-gray-500">Fuera de horario</p>
-        <p className="text-gray-400">
+        <p className="font-medium text-gray-500 dark:text-gray-400">Fuera de horario</p>
+        <p className="text-gray-400 dark:text-gray-500">
           {formatTime(start)} – {formatTime(end)}
         </p>
       </div>
     );
   }
 
+  const canDrop = mode === "admin" && !!onReschedule && !!draggingId;
+
   return (
-    <button
+    <motion.button
       type="button"
       onClick={() => {
         if (mode === "admin" && onToggleBlock && !onSelectSlot) {
@@ -219,12 +239,36 @@ function SlotCell({
           onSelectSlot({ spaceId, time });
         }
       }}
-      className={`slot-cell h-full font-medium transition ${
+      onDragOver={
+        canDrop
+          ? (e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              if (!dragOver) setDragOver(true);
+            }
+          : undefined
+      }
+      onDragLeave={canDrop ? () => setDragOver(false) : undefined}
+      onDrop={
+        canDrop
+          ? (e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const appointmentId = e.dataTransfer.getData("text/plain");
+              onDragStateChange?.(null);
+              if (appointmentId) onReschedule({ appointmentId, spaceId, time });
+            }
+          : undefined
+      }
+      className={`slot-cell relative h-full font-medium transition ${
         isSelected ? "slot-selected" : "slot-available"
-      }`}
+      } ${dragOver ? "slot-drop-target" : ""}`}
+      whileHover={{ scale: 1.03, zIndex: 20 }}
+      whileTap={{ scale: 0.97, zIndex: 20 }}
+      transition={{ duration: 0.12 }}
     >
       Disponible
-    </button>
+    </motion.button>
   );
 }
 
@@ -240,10 +284,12 @@ export default function DayCalendar({
   onToggleBlock,
   onCancelAppointment,
   onOpenPending,
+  onReschedule,
   selectedSlot,
   slotDuration,
   currentCustomerId,
 }) {
+  const [draggingId, setDraggingId] = useState(null);
   const duration = slotDuration || business.min_appointment_minutes;
   const hours = useMemo(() => resolveHours(business, date), [business, date]);
   const openStr = hours.openHour;
@@ -262,7 +308,7 @@ export default function DayCalendar({
 
   if (!spaces.length) {
     return (
-      <div className="card p-6 text-center text-sm text-gray-600">
+      <div className="card p-6 text-center text-sm text-gray-600 dark:text-gray-400">
         No hay estaciones configuradas. El administrador debe definir al menos una en
         Configuración.
       </div>
@@ -272,7 +318,7 @@ export default function DayCalendar({
   return (
     <div className="max-w-full min-w-0 space-y-4">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <label htmlFor="calendar-date" className="text-sm font-medium text-gray-700">
+        <label htmlFor="calendar-date" className="text-sm font-medium text-gray-700 dark:text-gray-300">
           Fecha
         </label>
         <input
@@ -286,8 +332,8 @@ export default function DayCalendar({
       </div>
 
       {hours.isClosed && mode === "admin" ? (
-        <div className="card space-y-1 p-4 text-sm text-gray-600 sm:p-5">
-          <p className="font-medium text-gray-900">Cerrado este día</p>
+        <div className="card space-y-1 p-4 text-sm text-gray-600 dark:text-gray-400 sm:p-5">
+          <p className="font-medium text-gray-900 dark:text-gray-100">Cerrado este día</p>
           <p>
             En la configuración este día no tiene atención. Las reservas existentes siguen
             visibles.
@@ -296,10 +342,10 @@ export default function DayCalendar({
       ) : null}
 
       {mode === "customer" && visibleSlots.length === 0 ? (
-        <div className="card space-y-3 p-4 text-sm text-gray-600 sm:p-5">
+        <div className="card space-y-3 p-4 text-sm text-gray-600 dark:text-gray-400 sm:p-5">
           {hours.isClosed ? (
             <>
-              <p className="font-medium text-gray-900">El negocio no atiende este día</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">El negocio no atiende este día</p>
               <p>Te invitamos a elegir otra fecha en el calendario.</p>
               {isToday && (
                 <button
@@ -313,7 +359,7 @@ export default function DayCalendar({
             </>
           ) : isToday ? (
             <>
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-gray-900 dark:text-gray-100">
                 No hay más horarios disponibles para hoy
               </p>
               <p>
@@ -341,7 +387,7 @@ export default function DayCalendar({
       <div className="space-y-3">
         {visibleSlots.map((time) => (
           <div key={time} className="card p-3">
-            <p className="mb-3 text-sm font-semibold text-gray-800">
+            <p className="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-200">
               {formatTime(combineDateAndTime(date, time))}
             </p>
             <div className="grid grid-cols-1 gap-2">
@@ -364,7 +410,7 @@ export default function DayCalendar({
 
                 return (
                   <div key={sp.id} className="flex min-h-[52px] flex-col">
-                    <p className="mb-1 shrink-0 text-xs font-medium text-gray-500">{sp.name}</p>
+                    <p className="mb-1 shrink-0 text-xs font-medium text-gray-500 dark:text-gray-400">{sp.name}</p>
                     <div className="flex w-full flex-1">
                       <SlotCell
                         mode={mode}
@@ -379,6 +425,9 @@ export default function DayCalendar({
                         onToggleBlock={onToggleBlock}
                         onCancelAppointment={onCancelAppointment}
                         onOpenPending={onOpenPending}
+                        onReschedule={onReschedule}
+                        draggingId={draggingId}
+                        onDragStateChange={setDraggingId}
                       />
                     </div>
                   </div>
@@ -392,15 +441,15 @@ export default function DayCalendar({
 
       {/* Desktop: tabla con scroll horizontal */}
       {isDesktop && visibleSlots.length > 0 && (
-      <div className="scroll-table max-w-full rounded-lg border border-gray-200 bg-white">
+      <div className="scroll-table max-w-full rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="sticky left-0 z-10 bg-gray-50 px-3 py-2 text-left font-medium text-gray-500">
+            <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+              <th className="sticky left-0 z-10 bg-gray-50 px-3 py-2 text-left font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                 Hora
               </th>
               {spaces.map((sp) => (
-                <th key={sp.id} className="px-3 py-2 text-left font-medium text-gray-700">
+                <th key={sp.id} className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
                   {sp.name}
                 </th>
               ))}
@@ -408,8 +457,8 @@ export default function DayCalendar({
           </thead>
           <tbody>
             {visibleSlots.map((time) => (
-              <tr key={time} className="border-b border-gray-100">
-                <td className="sticky left-0 z-10 bg-white px-3 py-2 text-gray-500 tabular-nums">
+              <tr key={time} className="border-b border-gray-100 dark:border-gray-800">
+                <td className="sticky left-0 z-10 bg-white px-3 py-2 text-gray-500 tabular-nums dark:bg-gray-900 dark:text-gray-400">
                   {formatTime(combineDateAndTime(date, time))}
                 </td>
                 {spaces.map((sp) => {
@@ -444,6 +493,9 @@ export default function DayCalendar({
                         onToggleBlock={onToggleBlock}
                         onCancelAppointment={onCancelAppointment}
                         onOpenPending={onOpenPending}
+                        onReschedule={onReschedule}
+                        draggingId={draggingId}
+                        onDragStateChange={setDraggingId}
                       />
                     </td>
                   );
