@@ -6,6 +6,7 @@ import { formatDateShort } from "@/lib/utils";
 import { BarChart3, CalendarCheck, TrendingUp, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Reportes" };
 
 export default async function AdminReportsPage({ params }) {
   const { slug } = await params;

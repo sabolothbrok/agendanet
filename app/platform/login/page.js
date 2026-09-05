@@ -3,6 +3,7 @@ import { platformLoginAction } from "@/app/actions/auth";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Acceso plataforma" };
 
 export default async function PlatformLoginPage({ searchParams }) {
   const sp = await searchParams;

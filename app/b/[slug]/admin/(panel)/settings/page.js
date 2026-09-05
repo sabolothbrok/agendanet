@@ -5,6 +5,7 @@ import { requireAdminSession } from "@/lib/auth";
 import { listSpaces } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Configuración" };
 
 export default async function AdminSettingsPage({ params }) {
   const { slug } = await params;

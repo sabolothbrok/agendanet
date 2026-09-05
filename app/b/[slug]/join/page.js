@@ -1,6 +1,8 @@
 import JoinForm from "@/components/JoinForm";
 import { getInviteByToken } from "@/lib/queries";
 
+export const metadata = { title: "Unirse" };
+
 export default async function JoinPage({ params, searchParams }) {
   const { slug } = await params;
   const sp = await searchParams;

@@ -4,6 +4,7 @@ import { requireAdminSession } from "@/lib/auth";
 import { listServices } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Servicios" };
 
 export default async function AdminServicesPage({ params }) {
   const { slug } = await params;

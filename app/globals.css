@@ -243,6 +243,11 @@
   border-color: var(--lk-line);
   color: var(--lk-muted);
 }
+.dark .landing-hero-bg {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+}
 .dark .landing-checklist li {
   color: var(--lk-muted);
 }

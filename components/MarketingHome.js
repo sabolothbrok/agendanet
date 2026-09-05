@@ -440,8 +440,8 @@ export default function MarketingHome() {
               <Link href="#precios" className="landing-btn-primary landing-btn-lg">
                 Ver planes
               </Link>
-              <Link href="#funciones" className="landing-btn-secondary landing-btn-lg">
-                Ver funciones
+              <Link href="#experiencia-web" className="landing-btn-secondary landing-btn-lg">
+                Ver la app en acción
               </Link>
             </div>
             <ul className="landing-hero-proof">

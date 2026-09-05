@@ -3,6 +3,8 @@ import BusinessTypesSettings from "@/components/BusinessTypesSettings";
 import { getSession } from "@/lib/session";
 import { getPlatformAdminById, listBusinessTypes } from "@/lib/queries";
 
+export const metadata = { title: "Configuración" };
+
 export default async function PlatformSettingsPage() {
   const session = await getSession();
   const [profile, businessTypes] = await Promise.all([

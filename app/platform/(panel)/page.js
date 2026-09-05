@@ -6,6 +6,7 @@ import { listBusinessesByPlatformAdmin } from "@/lib/queries";
 import { formatPhone } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Mis negocios" };
 
 export default async function PlatformHomePage() {
   const session = await getSession();

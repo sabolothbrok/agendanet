@@ -1,6 +1,8 @@
 import CreateBusinessForm from "@/components/CreateBusinessForm";
 import { listBusinessTypes } from "@/lib/queries";
 
+export const metadata = { title: "Nuevo negocio" };
+
 export default async function NewBusinessPage() {
   const businessTypes = await listBusinessTypes();
 

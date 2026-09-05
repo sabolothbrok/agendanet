@@ -5,6 +5,7 @@ import { getCalendarData } from "@/lib/queries";
 import { todayDateInputStr } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Calendario" };
 
 export default async function AdminCalendarPage({ params, searchParams }) {
   const { slug } = await params;
