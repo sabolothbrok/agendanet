@@ -11,6 +11,8 @@ export default function Reveal({
   delay = 0,
   y = 20,
   duration = 0.6,
+  whileHover,
+  whileTap,
 }) {
   const MotionTag = motion[as] || motion.div;
 
@@ -21,6 +23,8 @@ export default function Reveal({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration, delay, ease: EASE }}
+      whileHover={whileHover}
+      whileTap={whileTap}
     >
       {children}
     </MotionTag>

@@ -259,7 +259,7 @@ export default function IndustriesSection() {
   const active = INDUSTRIES.find((i) => i.id === activeId) ?? INDUSTRIES[0];
 
   return (
-    <section className="landing-band">
+    <section>
       <div className="landing-container landing-pad">
         <div className="landing-head">
           <p className="landing-tag">Industrias</p>
