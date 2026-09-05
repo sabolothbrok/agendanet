@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 import { logoutAction } from "@/app/actions/auth";
 import { Building2, LayoutDashboard, LogOut, Plus, Settings } from "lucide-react";
 
@@ -16,30 +17,33 @@ function isActive(current, href) {
 export default function PlatformNav({ adminName, current }) {
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-gray-200 bg-white md:hidden">
+      <header className="sticky top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
               Admin general
             </p>
-            <p className="truncate font-semibold text-gray-900">{adminName}</p>
+            <p className="truncate font-semibold text-gray-900 dark:text-gray-100">{adminName}</p>
           </div>
-          <form action={logoutAction}>
-            <input type="hidden" name="redirectTo" value="/platform/login" />
-            <button type="submit" className="btn btn-secondary p-2" aria-label="Cerrar sesión">
-              <LogOut size={18} />
-            </button>
-          </form>
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="h-9 w-9" />
+            <form action={logoutAction}>
+              <input type="hidden" name="redirectTo" value="/platform/login" />
+              <button type="submit" className="btn btn-secondary p-2" aria-label="Cerrar sesión">
+                <LogOut size={18} />
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-gray-200 bg-white md:flex">
-        <div className="border-b border-gray-200 px-4 py-5">
-          <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+      <aside className="hidden w-56 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 md:flex">
+        <div className="border-b border-gray-200 px-4 py-5 dark:border-gray-700">
+          <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
             <Building2 size={14} />
             Admin general
           </p>
-          <p className="mt-1 font-semibold text-gray-900">{adminName}</p>
+          <p className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{adminName}</p>
         </div>
         <nav className="flex-1 space-y-1 p-3">
           {links.map(({ href, label, icon: Icon }) => (
@@ -49,7 +53,7 @@ export default function PlatformNav({ adminName, current }) {
               className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium ${
                 isActive(current, href)
                   ? "nav-link-active"
-                  : "text-gray-600 hover:bg-gray-100"
+                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               }`}
             >
               <Icon size={18} />
@@ -57,16 +61,19 @@ export default function PlatformNav({ adminName, current }) {
             </Link>
           ))}
         </nav>
-        <form action={logoutAction} className="border-t border-gray-200 p-3">
-          <input type="hidden" name="redirectTo" value="/platform/login" />
-          <button type="submit" className="btn btn-secondary w-full text-sm">
-            Cerrar sesión
-          </button>
-        </form>
+        <div className="flex items-center gap-2 border-t border-gray-200 p-3 dark:border-gray-700">
+          <ThemeToggle className="h-9 w-9 shrink-0" />
+          <form action={logoutAction} className="flex-1">
+            <input type="hidden" name="redirectTo" value="/platform/login" />
+            <button type="submit" className="btn btn-secondary w-full text-sm">
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
       </aside>
 
       <nav
-        className="app-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white md:hidden"
+        className="app-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 md:hidden"
         aria-label="Navegación plataforma"
       >
         <div className="grid min-w-0 grid-cols-3">
@@ -77,7 +84,7 @@ export default function PlatformNav({ adminName, current }) {
               aria-label={label}
               aria-current={isActive(current, href) ? "page" : undefined}
               className={`flex min-h-[3.25rem] flex-col items-center justify-center px-1 py-1.5 ${
-                isActive(current, href) ? "nav-icon-active" : "text-gray-500"
+                isActive(current, href) ? "nav-icon-active" : "text-gray-500 dark:text-gray-400"
               }`}
             >
               <Icon size={20} strokeWidth={isActive(current, href) ? 2.25 : 1.75} />

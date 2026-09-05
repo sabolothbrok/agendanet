@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { unstable_rethrow } from "next/navigation";
-import { Building2, Calendar, Phone, Shield, Smartphone } from "lucide-react";
+import { Building2, Phone, Shield, Smartphone } from "lucide-react";
+import AppIcon from "@/components/AppIcon";
 import LoginFooter from "@/components/LoginFooter";
 import LoginSessionResume from "@/components/LoginSessionResume";
+import Spinner from "@/components/Spinner";
 import {
   getSessionContinueHref,
   getSessionContinueLabel,
@@ -65,9 +67,7 @@ export default function UniversalLoginForm({
     <div className="auth-card">
       <header className="auth-card-header">
         <Link href="/" className="auth-brand" aria-label="AgendaNet — inicio">
-          <span className="auth-brand-mark">
-            <Calendar className="h-5 w-5" aria-hidden />
-          </span>
+          <AppIcon className="h-9 w-9 shrink-0" />
           <span className="auth-brand-name">AgendaNet</span>
         </Link>
         <h1 className="auth-title">
@@ -166,6 +166,7 @@ export default function UniversalLoginForm({
             )}
 
             <button type="submit" disabled={isPending} className="btn btn-primary auth-submit">
+              {isPending && <Spinner />}
               {isPending ? "Entrando..." : destinations ? "Continuar" : "Entrar"}
             </button>
           </form>

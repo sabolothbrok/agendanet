@@ -32,8 +32,8 @@ export default async function ClientHomePage({ params, searchParams }) {
       <Suspense fallback={null}>
         <BookedToast />
       </Suspense>
-      <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Reservar cita</h1>
-      <p className="mt-1 text-sm text-gray-600 sm:text-base">
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Reservar cita</h1>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
         {business.require_booking_approval
           ? "Elige un espacio. Tu reserva quedará pendiente hasta que el negocio la apruebe."
           : "Elige un espacio disponible en el calendario"}

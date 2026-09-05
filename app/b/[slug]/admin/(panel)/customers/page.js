@@ -1,4 +1,3 @@
-import AdminShell from "@/components/AdminShell";
 import CustomersClient from "@/components/CustomersClient";
 import { getSession } from "@/lib/session";
 import { requireAdminSession } from "@/lib/auth";
@@ -13,19 +12,14 @@ export default async function AdminCustomersPage({ params }) {
   const customers = await listCustomers(auth.business.id);
 
   return (
-    <AdminShell
-      slug={slug}
-      businessName={auth.business.name}
-      current="/customers"
-      isPlatformAdmin={auth.isPlatformAdmin}
-    >
-      <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Clientes</h1>
-      <p className="mt-1 text-sm text-gray-600 sm:text-base">
+    <>
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Clientes</h1>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
         Lista, invitaciones y acceso premium
       </p>
       <div className="mt-6">
         <CustomersClient slug={slug} customers={customers} />
       </div>
-    </AdminShell>
+    </>
   );
 }

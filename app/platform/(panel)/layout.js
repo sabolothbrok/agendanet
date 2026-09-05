@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import PlatformShell from "@/components/PlatformShell";
 import SessionGuard from "@/components/SessionGuard";
 import { getSession } from "@/lib/session";
 import { requirePlatformAdminSession } from "@/lib/auth";
@@ -14,9 +15,9 @@ export default async function PlatformPanelLayout({ children }) {
   }
 
   return (
-    <>
+    <PlatformShell adminName={auth.session.name}>
       <SessionGuard />
       {children}
-    </>
+    </PlatformShell>
   );
 }

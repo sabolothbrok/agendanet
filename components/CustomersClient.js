@@ -11,6 +11,7 @@ import { formatPhone, formatTime } from "@/lib/utils";
 import { INVITE_TTL_MINUTES } from "@/lib/constants";
 import { useConfirm } from "@/hooks/useConfirm";
 import { useToast } from "@/hooks/useToast";
+import Spinner from "@/components/Spinner";
 
 async function copyToClipboard(text) {
   if (navigator.clipboard?.writeText) {
@@ -106,8 +107,8 @@ export default function CustomersClient({ slug, customers: initial }) {
     <div className="space-y-6">
       {dialog}
       <div className="card p-4 sm:p-6">
-        <h2 className="font-semibold text-gray-900">Invitar clientes</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Invitar clientes</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Genera un enlace y compártelo por mensaje. Cualquier persona con el enlace
           puede registrarse con su teléfono mientras no expire ({INVITE_TTL_MINUTES}{" "}
           minutos).
@@ -118,12 +119,13 @@ export default function CustomersClient({ slug, customers: initial }) {
           disabled={isPending}
           className="btn btn-primary mt-4 w-full sm:w-auto"
         >
+          {isPending && <Spinner />}
           {isPending ? "Generando…" : "Generar enlace"}
         </button>
         {inviteLink && (
           <div className="mt-3 space-y-2">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-              <p className="min-w-0 flex-1 break-all rounded-lg bg-gray-50 p-3 text-xs text-gray-700">
+              <p className="min-w-0 flex-1 break-all rounded-lg bg-gray-50 p-3 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                 {inviteLink}
               </p>
               <button
@@ -145,7 +147,7 @@ export default function CustomersClient({ slug, customers: initial }) {
               </button>
             </div>
             {inviteExpiresAt && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Válido hasta las {formatTime(inviteExpiresAt)}
               </p>
             )}
@@ -159,8 +161,8 @@ export default function CustomersClient({ slug, customers: initial }) {
           <div key={c.id} className="card p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="font-medium text-gray-900">{c.name || "—"}</p>
-                <p className="text-sm text-gray-600">{formatPhone(c.phone)}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{c.name || "—"}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{formatPhone(c.phone)}</p>
               </div>
               <button
                 type="button"
@@ -182,7 +184,7 @@ export default function CustomersClient({ slug, customers: initial }) {
           </div>
         ))}
         {customers.length === 0 && (
-          <p className="card p-8 text-center text-gray-500">Aún no hay clientes.</p>
+          <p className="card p-8 text-center text-gray-500 dark:text-gray-400">Aún no hay clientes.</p>
         )}
       </div>
 
@@ -190,19 +192,19 @@ export default function CustomersClient({ slug, customers: initial }) {
       <div className="card hidden md:block">
         <div className="table-scroll">
         <table className="w-full min-w-[520px] text-sm">
-          <thead className="border-b border-gray-200 bg-gray-50">
+          <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Cliente</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Teléfono</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Premium</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-600">Acciones</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Cliente</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Teléfono</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Premium</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {customers.map((c) => (
-              <tr key={c.id} className="border-b border-gray-100">
-                <td className="px-4 py-3 font-medium text-gray-900">{c.name || "—"}</td>
-                <td className="px-4 py-3 text-gray-600">{formatPhone(c.phone)}</td>
+              <tr key={c.id} className="border-b border-gray-100 dark:border-gray-800">
+                <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{c.name || "—"}</td>
+                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatPhone(c.phone)}</td>
                 <td className="px-4 py-3">
                   <button
                     type="button"
@@ -218,7 +220,7 @@ export default function CustomersClient({ slug, customers: initial }) {
                   <button
                     type="button"
                     onClick={() => remove(c.id)}
-                    className="text-sm text-red-600 hover:underline"
+                    className="text-sm text-red-600 hover:underline dark:text-red-400"
                   >
                     Eliminar
                   </button>
@@ -229,7 +231,7 @@ export default function CustomersClient({ slug, customers: initial }) {
         </table>
         </div>
         {customers.length === 0 && (
-          <p className="p-8 text-center text-gray-500">Aún no hay clientes.</p>
+          <p className="p-8 text-center text-gray-500 dark:text-gray-400">Aún no hay clientes.</p>
         )}
       </div>
     </div>

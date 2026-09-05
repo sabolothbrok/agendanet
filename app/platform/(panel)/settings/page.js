@@ -1,4 +1,3 @@
-import PlatformShell from "@/components/PlatformShell";
 import PlatformSettingsForm from "@/components/PlatformSettingsForm";
 import BusinessTypesSettings from "@/components/BusinessTypesSettings";
 import { getSession } from "@/lib/session";
@@ -12,9 +11,9 @@ export default async function PlatformSettingsPage() {
   ]);
 
   return (
-    <PlatformShell adminName={session.name} current="/settings">
-      <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Configuración</h1>
-      <p className="mt-1 text-sm text-gray-600 sm:text-base">
+    <>
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Configuración</h1>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
         Perfil y tipos de negocio disponibles al crear nuevos negocios.
       </p>
 
@@ -22,6 +21,6 @@ export default async function PlatformSettingsPage() {
         <PlatformSettingsForm profile={profile} />
         <BusinessTypesSettings types={businessTypes} />
       </div>
-    </PlatformShell>
+    </>
   );
 }

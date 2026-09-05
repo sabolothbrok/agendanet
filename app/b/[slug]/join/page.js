@@ -9,7 +9,7 @@ export default async function JoinPage({ params, searchParams }) {
   if (!token) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <p className="text-gray-600">Enlace de invitación inválido.</p>
+        <p className="text-gray-600 dark:text-gray-400">Enlace de invitación inválido.</p>
       </div>
     );
   }
@@ -18,7 +18,7 @@ export default async function JoinPage({ params, searchParams }) {
   if (!invite || invite.slug !== slug) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8">
-        <p className="text-gray-600">Este enlace no es válido o expiró.</p>
+        <p className="text-gray-600 dark:text-gray-400">Este enlace no es válido o expiró.</p>
       </div>
     );
   }

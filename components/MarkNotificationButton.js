@@ -29,7 +29,7 @@ export default function MarkNotificationButton({ slug, notificationId }) {
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="text-xs text-gray-500 hover:underline disabled:opacity-50"
+      className="text-xs text-gray-500 hover:underline disabled:opacity-50 dark:text-gray-400"
     >
       {isPending ? "Marcando..." : "Marcar leída"}
     </button>

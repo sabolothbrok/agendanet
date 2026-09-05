@@ -1,4 +1,3 @@
-import AdminShell from "@/components/AdminShell";
 import AdminCalendarClient from "@/components/AdminCalendarClient";
 import { getSession } from "@/lib/session";
 import { requireAdminSession } from "@/lib/auth";
@@ -18,14 +17,9 @@ export default async function AdminCalendarPage({ params, searchParams }) {
   const calendarData = await getCalendarData(business.id, date, { includePending: true });
 
   return (
-    <AdminShell
-      slug={slug}
-      businessName={business.name}
-      current="/calendar"
-      isPlatformAdmin={auth.isPlatformAdmin}
-    >
-      <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Calendario</h1>
-      <p className="mt-1 text-sm text-gray-600 sm:text-base">
+    <>
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Calendario</h1>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
         Gestiona disponibilidad de espacios y reservas
       </p>
       <div className="mt-6">
@@ -36,6 +30,6 @@ export default async function AdminCalendarPage({ params, searchParams }) {
           calendarData={calendarData}
         />
       </div>
-    </AdminShell>
+    </>
   );
 }

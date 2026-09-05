@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { Inbox } from "lucide-react";
 import { adminApproveAppointment, adminRejectAppointment } from "@/app/actions/admin";
 import { useConfirm } from "@/hooks/useConfirm";
 import { useToast } from "@/hooks/useToast";
+import EmptyState from "@/components/EmptyState";
 import {
   formatPhone,
   formatTime,
@@ -78,7 +80,7 @@ export default function PendingRequestsList({ slug, appointments, onResolved }) 
     return (
       <>
         {dialog}
-        <p className="mt-4 text-sm text-gray-500">No hay solicitudes pendientes.</p>
+        <EmptyState icon={Inbox} description="No hay solicitudes pendientes." />
       </>
     );
   }
@@ -88,17 +90,17 @@ export default function PendingRequestsList({ slug, appointments, onResolved }) 
       {dialog}
       {days.map((day) => (
         <section key={day.date}>
-          <h3 className="text-sm font-semibold capitalize text-gray-900">{day.label}</h3>
+          <h3 className="text-sm font-semibold capitalize text-gray-900 dark:text-gray-100">{day.label}</h3>
           <div className="mt-3 space-y-4">
             {day.slots.map((slot) => (
               <div
                 key={slot.key}
-                className="rounded-lg border border-amber-200 bg-amber-50/60 p-3 sm:p-4"
+                className="rounded-lg border border-amber-200 bg-amber-50/60 p-3 sm:p-4 dark:border-amber-900 dark:bg-amber-950/40"
               >
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {formatTime(slot.startAt)} – {formatTime(slot.endAt)} · {slot.spaceName}
                 </p>
-                <p className="mt-0.5 text-xs text-amber-800">
+                <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-400">
                   {slot.appointments.length}{" "}
                   {slot.appointments.length === 1 ? "solicitud" : "solicitudes"}
                 </p>
@@ -106,15 +108,15 @@ export default function PendingRequestsList({ slug, appointments, onResolved }) 
                   {slot.appointments.map((apt) => (
                     <li
                       key={apt.id}
-                      className="flex flex-col gap-2 rounded-lg border border-white bg-white px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-2 rounded-lg border border-white bg-white px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 dark:bg-gray-800"
                     >
                       <div className="min-w-0">
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-gray-900 dark:text-gray-100">
                           {apt.customer_name || "Cliente"}
                         </p>
-                        <p className="text-gray-500">{formatPhone(apt.customer_phone)}</p>
+                        <p className="text-gray-500 dark:text-gray-400">{formatPhone(apt.customer_phone)}</p>
                         {apt.services?.length > 0 && (
-                          <p className="mt-0.5 text-gray-500 break-words">
+                          <p className="mt-0.5 text-gray-500 dark:text-gray-400 break-words">
                             {apt.services.map((s) => s.name).join(", ")}
                           </p>
                         )}

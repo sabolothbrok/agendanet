@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { unstable_rethrow } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import { useState, useTransition } from "react";
 import DayCalendar from "@/components/DayCalendar";
 import PremiumBadge from "@/components/PremiumBadge";
+import Spinner from "@/components/Spinner";
 import { customerBook } from "@/app/actions/customer";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -137,12 +139,12 @@ export default function BookingClient({
       <form onSubmit={handleSubmit} className="card space-y-4 p-4 sm:p-6">
         {business.show_services_list && services.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-gray-900">Servicios</h3>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Servicios</h3>
             <div className="mt-2 space-y-2">
               {services.map((s) => (
                 <label
                   key={s.id}
-                  className="flex cursor-pointer flex-wrap items-start justify-between gap-x-3 gap-y-1 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
+                  className="flex cursor-pointer flex-wrap items-start justify-between gap-x-3 gap-y-1 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
                 >
                   <span className="flex min-w-0 items-start gap-2">
                     <input
@@ -156,7 +158,7 @@ export default function BookingClient({
                       {s.is_premium && <PremiumBadge compact className="ml-1 align-middle" />}
                     </span>
                   </span>
-                  <span className="shrink-0 text-right text-gray-500">
+                  <span className="shrink-0 text-right text-gray-500 dark:text-gray-400">
                     {s.duration_minutes} min · {formatOptionalPrice(s.price)}
                   </span>
                 </label>
@@ -165,28 +167,37 @@ export default function BookingClient({
           </div>
         )}
 
-        {previewStart && (
-          <div className="rounded-lg bg-gray-50 p-4 text-sm">
-            <p className="font-medium text-gray-900">Resumen</p>
-            <p className="mt-1 text-gray-600">{formatDate(previewStart)}</p>
-            <p className="text-gray-600">
-              {formatTime(previewStart)} – {formatTime(previewEnd)} ({duration} min)
-            </p>
-            {business.require_booking_approval && (
-              <p className="mt-2 text-amber-800">
-                El negocio debe aprobar esta solicitud.
+        <AnimatePresence>
+          {previewStart && (
+            <motion.div
+              className="rounded-lg bg-gray-50 p-4 text-sm dark:bg-gray-800"
+              initial={{ opacity: 0, y: -6, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <p className="font-medium text-gray-900 dark:text-gray-100">Resumen</p>
+              <p className="mt-1 text-gray-600 dark:text-gray-400">{formatDate(previewStart)}</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                {formatTime(previewStart)} – {formatTime(previewEnd)} ({duration} min)
               </p>
-            )}
-          </div>
-        )}
+              {business.require_booking_approval && (
+                <p className="mt-2 text-amber-800">
+                  El negocio debe aprobar esta solicitud.
+                </p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {displayError && <p className="text-sm text-red-600">{displayError}</p>}
+        {displayError && <p className="text-sm text-red-600 dark:text-red-400">{displayError}</p>}
 
         <button
           type="submit"
           disabled={isPending || !slotIsValid}
           className="btn btn-primary w-full"
         >
+          {isPending && <Spinner />}
           {isPending
             ? "Enviando..."
             : business.require_booking_approval

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import AdminShell from "@/components/AdminShell";
 import SessionGuard from "@/components/SessionGuard";
 import { getSession } from "@/lib/session";
 import { requireAdminSession } from "@/lib/auth";
@@ -18,9 +19,13 @@ export default async function AdminPanelLayout({ children, params }) {
   }
 
   return (
-    <>
+    <AdminShell
+      slug={slug}
+      businessName={auth.business.name}
+      isPlatformAdmin={auth.isPlatformAdmin}
+    >
       <SessionGuard />
       {children}
-    </>
+    </AdminShell>
   );
 }

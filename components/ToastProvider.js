@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   createContext,
   useCallback,
@@ -68,23 +69,34 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={value}>
       {children}
       <div className="toast-stack" aria-live="polite" aria-atomic="true">
-        {toast && (() => {
-          const Icon = ICONS[toast.type] || Info;
-          return (
-            <div key={toast.id} className={`toast toast-${toast.type}`} role="status">
-              <Icon className="toast-icon" aria-hidden />
-              <p className="toast-message">{toast.message}</p>
-              <button
-                type="button"
-                className="toast-close"
-                onClick={() => dismiss(toast.id)}
-                aria-label="Cerrar"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          );
-        })()}
+        <AnimatePresence>
+          {toast &&
+            (() => {
+              const Icon = ICONS[toast.type] || Info;
+              return (
+                <motion.div
+                  key={toast.id}
+                  className={`toast toast-${toast.type}`}
+                  role="status"
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Icon className="toast-icon" aria-hidden />
+                  <p className="toast-message">{toast.message}</p>
+                  <button
+                    type="button"
+                    className="toast-close"
+                    onClick={() => dismiss(toast.id)}
+                    aria-label="Cerrar"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </motion.div>
+              );
+            })()}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   );

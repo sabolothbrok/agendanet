@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { CalendarX2, Inbox } from "lucide-react";
 import { customerCancel } from "@/app/actions/customer";
+import EmptyState from "@/components/EmptyState";
 import {
   formatDateShort,
   formatTime,
@@ -65,12 +67,12 @@ export default function ReservationsClient({ slug, appointments, business }) {
       <li className="card p-4 text-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0">
-            <p className="font-medium text-gray-900">{formatDateShort(apt.start_at)}</p>
-            <p className="text-gray-600 break-words">
+            <p className="font-medium text-gray-900 dark:text-gray-100">{formatDateShort(apt.start_at)}</p>
+            <p className="text-gray-600 dark:text-gray-400 break-words">
               {formatTime(apt.start_at)} – {formatTime(apt.end_at)} · {apt.space_name}
             </p>
             {apt.services?.length > 0 && (
-              <p className="mt-1 text-gray-500 break-words">
+              <p className="mt-1 text-gray-500 dark:text-gray-400 break-words">
                 {apt.services.map((s) => s.name).join(", ")}
               </p>
             )}
@@ -91,8 +93,8 @@ export default function ReservationsClient({ slug, appointments, business }) {
           <div
             className={`mt-3 rounded-lg border px-3 py-2.5 ${
               statusDetail.tone === "warning"
-                ? "border-amber-200 bg-amber-50 text-amber-950"
-                : "border-gray-200 bg-gray-50 text-gray-700"
+                ? "border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+                : "border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
             }`}
           >
             <p className="font-medium">{statusDetail.title}</p>
@@ -124,9 +126,9 @@ export default function ReservationsClient({ slug, appointments, business }) {
       {dialog}
       {(business.require_booking_approval || pending.length > 0) && (
         <section>
-          <h2 className="font-semibold text-gray-900">Pendientes de aprobación</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Pendientes de aprobación</h2>
           {pending.length === 0 ? (
-            <p className="mt-3 text-sm text-gray-500">No tienes solicitudes pendientes.</p>
+            <EmptyState icon={Inbox} description="No tienes solicitudes pendientes." />
           ) : (
             <ul className="mt-3 space-y-3">
               {pending.map((apt) => (
@@ -137,9 +139,9 @@ export default function ReservationsClient({ slug, appointments, business }) {
         </section>
       )}
       <section>
-        <h2 className="font-semibold text-gray-900">Activas</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Activas</h2>
         {active.length === 0 ? (
-          <p className="mt-3 text-sm text-gray-500">No tienes reservas activas.</p>
+          <EmptyState icon={CalendarX2} description="No tienes reservas activas." />
         ) : (
           <ul className="mt-3 space-y-3">
             {active.map((apt) => (
@@ -149,13 +151,13 @@ export default function ReservationsClient({ slug, appointments, business }) {
         )}
       </section>
       <section>
-        <h2 className="font-semibold text-gray-900">Historial</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Historial</h2>
         {history.length === 0 ? (
-          <p className="mt-3 text-sm text-gray-500">Sin historial.</p>
+          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">Sin historial.</p>
         ) : (
           <>
             {historyTruncated && (
-              <p className="mt-3 text-sm text-gray-500">
+              <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
                 Mostrando las últimas {CLIENT_HISTORY_LIMIT} entradas del historial.
               </p>
             )}

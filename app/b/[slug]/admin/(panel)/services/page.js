@@ -1,4 +1,3 @@
-import AdminShell from "@/components/AdminShell";
 import ServicesClient from "@/components/ServicesClient";
 import { getSession } from "@/lib/session";
 import { requireAdminSession } from "@/lib/auth";
@@ -13,20 +12,15 @@ export default async function AdminServicesPage({ params }) {
   const services = await listServices(auth.business.id);
 
   return (
-    <AdminShell
-      slug={slug}
-      businessName={auth.business.name}
-      current="/services"
-      isPlatformAdmin={auth.isPlatformAdmin}
-    >
-      <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Servicios</h1>
-      <p className="mt-1 text-sm text-gray-600 sm:text-base">
+    <>
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Servicios</h1>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
         Agrega, edita o elimina servicios. La duración calcula automáticamente la cita.
       </p>
 
       <div className="mt-6">
         <ServicesClient slug={slug} services={services} />
       </div>
-    </AdminShell>
+    </>
   );
 }

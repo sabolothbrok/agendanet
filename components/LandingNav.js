@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import AppIcon from "@/components/AppIcon";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const LINKS = [
   { href: "#funciones", label: "Funciones" },
@@ -40,9 +42,7 @@ export default function LandingNav() {
       <header className="landing-header">
         <div className="landing-container landing-header-row">
           <Link href="/" className="landing-brand" onClick={() => setOpen(false)}>
-            <span className="landing-brand-mark">
-              <Calendar className="h-5 w-5" />
-            </span>
+            <AppIcon className="h-9 w-9 shrink-0" />
             <span className="landing-brand-name">AgendaNet</span>
           </Link>
 
@@ -63,16 +63,20 @@ export default function LandingNav() {
             </Link>
           </div>
 
-          <button
-            type="button"
-            className="landing-menu-btn"
-            aria-expanded={open}
-            aria-controls="landing-menu"
-            aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="ml-auto flex items-center gap-2 lg:ml-0">
+            <ThemeToggle className="h-10 w-10 shrink-0" />
+
+            <button
+              type="button"
+              className="landing-menu-btn"
+              aria-expanded={open}
+              aria-controls="landing-menu"
+              aria-label={open ? "Cerrar menú" : "Abrir menú"}
+              onClick={() => setOpen((v) => !v)}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -90,7 +94,7 @@ export default function LandingNav() {
         />
         <div className="landing-menu-panel" role="dialog" aria-modal="true" aria-label="Menú">
           <div className="landing-menu-panel-header">
-            <p className="text-sm font-semibold text-gray-900">Menú</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Menú</p>
             <button
               type="button"
               className="landing-menu-close"
@@ -112,7 +116,7 @@ export default function LandingNav() {
               </a>
             ))}
           </nav>
-          <div className="mt-auto border-t border-gray-200 pt-4 flex flex-col gap-2">
+          <div className="mt-auto border-t border-gray-200 pt-4 flex flex-col gap-2 dark:border-gray-700">
             <Link href="/login" className="landing-btn-secondary w-full" onClick={() => setOpen(false)}>
               Iniciar sesión
             </Link>

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { unstable_rethrow } from "next/navigation";
-import { Calendar } from "lucide-react";
+import AppIcon from "@/components/AppIcon";
 import LoginFooter from "@/components/LoginFooter";
 import LoginSessionResume from "@/components/LoginSessionResume";
+import Spinner from "@/components/Spinner";
 import {
   getSessionContinueHref,
   getSessionContinueLabel,
@@ -56,9 +57,7 @@ export default function PhoneLoginForm({
       <header className="auth-card-header">
         {showBrand && (
           <Link href="/" className="auth-brand" aria-label="AgendaNet — inicio">
-            <span className="auth-brand-mark">
-              <Calendar className="h-5 w-5" aria-hidden />
-            </span>
+            <AppIcon className="h-9 w-9 shrink-0" />
             <span className="auth-brand-name">AgendaNet</span>
           </Link>
         )}
@@ -111,6 +110,7 @@ export default function PhoneLoginForm({
               Usa el teléfono registrado en este negocio (tuyo o de quien ya fue invitado).
             </p>
             <button type="submit" disabled={isPending} className="btn btn-primary auth-submit">
+              {isPending && <Spinner />}
               {isPending ? "Entrando..." : "Entrar"}
             </button>
           </form>
