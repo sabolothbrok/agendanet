@@ -7,6 +7,7 @@ import AppIcon from "@/components/AppIcon";
 import LoginFooter from "@/components/LoginFooter";
 import LoginSessionResume from "@/components/LoginSessionResume";
 import Spinner from "@/components/Spinner";
+import { useCleanLoginUrl } from "@/hooks/useCleanLoginUrl";
 import {
   getSessionContinueHref,
   getSessionContinueLabel,
@@ -26,6 +27,7 @@ export default function PhoneLoginForm({
   expired,
   showBrand = true,
 }) {
+  const notice = useCleanLoginUrl(loggedOut, expired);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
@@ -72,12 +74,12 @@ export default function PhoneLoginForm({
       {!activeSession &&
         (error ? (
           <p className="auth-error" role="alert">{error}</p>
-        ) : loggedOut && !isPending ? (
+        ) : notice.loggedOut && !isPending ? (
           <p
-            className={`auth-notice ${expired ? "auth-notice-warn" : ""}`}
+            className={`auth-notice ${notice.expired ? "auth-notice-warn" : ""}`}
             role="status"
           >
-            {expired
+            {notice.expired
               ? "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
               : "Sesión cerrada correctamente."}
           </p>

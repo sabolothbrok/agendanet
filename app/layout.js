@@ -18,9 +18,29 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const DESCRIPTION =
+  "Plataforma multi-negocio de reservas con calendario, clientes y paneles admin.";
+
 export const metadata = {
-  title: "AgendaNet",
-  description: "Plataforma de citas para pequeños negocios",
+  metadataBase: new URL("https://agendanet.vercel.app"),
+  title: {
+    default: "AgendaNet — Citas online para tu negocio",
+    template: "%s · AgendaNet",
+  },
+  description: DESCRIPTION,
+  openGraph: {
+    title: "AgendaNet — Citas online para tu negocio",
+    description: DESCRIPTION,
+    url: "/",
+    siteName: "AgendaNet",
+    locale: "es",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AgendaNet — Citas online para tu negocio",
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport = {

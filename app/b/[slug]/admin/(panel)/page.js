@@ -8,6 +8,7 @@ import { getTodayAppointments, listNotifications, listPendingAppointments } from
 import { formatDate, formatTime, todayDateInputStr } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Panel" };
 
 export default async function AdminHomePage({ params }) {
   const { slug } = await params;

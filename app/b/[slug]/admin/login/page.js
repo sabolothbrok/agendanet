@@ -4,6 +4,7 @@ import { getBusinessBySlug } from "@/lib/queries";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Acceso administrador" };
 
 export default async function AdminLoginPage({ params, searchParams }) {
   const { slug } = await params;

@@ -141,6 +141,10 @@ export async function logoutAction(formData) {
   await clearSession();
 
   const base = redirectTo.split("?")[0];
+  if (!base.endsWith("/login")) {
+    redirect(base);
+  }
+
   const params = new URLSearchParams(redirectTo.includes("?") ? redirectTo.split("?")[1] : "");
   params.set("loggedOut", "1");
   redirect(`${base}?${params.toString()}`);

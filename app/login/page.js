@@ -3,6 +3,7 @@ import { universalLoginAction } from "@/app/actions/auth";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Iniciar sesión" };
 
 export default async function LoginPage({ searchParams }) {
   const sp = await searchParams;

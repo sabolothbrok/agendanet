@@ -4,6 +4,7 @@ import { requireCustomerSession } from "@/lib/auth";
 import { listCustomerAppointments } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Mis reservas" };
 
 export default async function ClientReservationsPage({ params }) {
   const { slug } = await params;

@@ -7,6 +7,7 @@ import { getCalendarData, listServices } from "@/lib/queries";
 import { todayDateInputStr } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Reservar" };
 
 export default async function ClientHomePage({ params, searchParams }) {
   const { slug } = await params;
