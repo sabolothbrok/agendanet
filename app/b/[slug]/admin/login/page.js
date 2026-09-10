@@ -25,13 +25,14 @@ export default async function AdminLoginPage({ params, searchParams }) {
         slug={slug}
         action={adminLoginAction}
         title={`Admin · ${business.name}`}
-        subtitle="Ingresa con tu teléfono de administrador."
+        subtitle="Ingresa con tu teléfono y contraseña de administrador."
         businessName={business.name}
         formKey={`admin-${slug}-${sp?.loggedOut || ""}`}
         activeSession={activeSession}
         logoutHref={logoutHref}
         loggedOut={sp?.loggedOut === "1"}
         expired={sp?.expired === "1"}
+        requiresPassword
       />
     </div>
   );

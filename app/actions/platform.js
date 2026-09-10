@@ -1,12 +1,17 @@
 "use server";
 
 import { requirePlatformAdminSession } from "@/lib/auth";
+import { hashPassword, isPasswordStrongEnough, PASSWORD_MIN_LENGTH, verifyPassword } from "@/lib/password";
 import {
+  clearAdminPassword,
   createBusinessWithAdmin,
   createBusinessType,
   deleteBusinessType,
+  getAdminByBusinessId,
+  getBusinessById,
   getBusinessSlugExists,
   getBusinessTypeBySlug,
+  setPlatformAdminPassword,
   updateBusinessTypeLabel,
   updatePlatformAdmin,
 } from "@/lib/queries";
@@ -97,6 +102,47 @@ export async function platformUpdateProfile(formData) {
 
   revalidatePath("/platform");
   revalidatePath("/platform/settings");
+  return { success: true };
+}
+
+export async function platformChangePassword(formData) {
+  const auth = await guard();
+  if (auth.error) return { error: "No autorizado" };
+
+  const currentPassword = String(formData.get("currentPassword") || "");
+  const newPassword = String(formData.get("newPassword") || "");
+  const confirmPassword = String(formData.get("confirmPassword") || "");
+
+  if (auth.platformAdmin.password_hash) {
+    const valid = await verifyPassword(currentPassword, auth.platformAdmin.password_hash);
+    if (!valid) return { error: "La contraseña actual no es correcta." };
+  }
+  if (!isPasswordStrongEnough(newPassword)) {
+    return { error: `La nueva contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.` };
+  }
+  if (newPassword !== confirmPassword) {
+    return { error: "Las contraseñas no coinciden." };
+  }
+
+  await setPlatformAdminPassword(auth.session.userId, await hashPassword(newPassword));
+  return { success: true };
+}
+
+/** Forces a business admin to set a brand-new password the next time they log in. */
+export async function platformResetAdminPassword(businessId) {
+  const auth = await guard();
+  if (auth.error) return { error: "No autorizado" };
+
+  const business = await getBusinessById(businessId);
+  if (!business || business.platform_admin_id !== auth.session.userId) {
+    return { error: "No autorizado" };
+  }
+
+  const admin = await getAdminByBusinessId(businessId);
+  if (!admin) return { error: "Este negocio no tiene administrador." };
+
+  await clearAdminPassword(admin.id);
+  revalidatePath("/platform");
   return { success: true };
 }
 

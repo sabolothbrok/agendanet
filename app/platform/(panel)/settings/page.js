@@ -1,5 +1,7 @@
 import PlatformSettingsForm from "@/components/PlatformSettingsForm";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
 import BusinessTypesSettings from "@/components/BusinessTypesSettings";
+import { platformChangePassword } from "@/app/actions/platform";
 import { getSession } from "@/lib/session";
 import { getPlatformAdminById, listBusinessTypes } from "@/lib/queries";
 
@@ -21,6 +23,10 @@ export default async function PlatformSettingsPage() {
 
       <div className="mt-6 space-y-6">
         <PlatformSettingsForm profile={profile} />
+        <ChangePasswordForm
+          action={platformChangePassword}
+          hasPassword={Boolean(profile.password_hash)}
+        />
         <BusinessTypesSettings types={businessTypes} />
       </div>
     </>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Building2 } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
+import ResetAdminPasswordButton from "@/components/ResetAdminPasswordButton";
 import { getSession } from "@/lib/session";
 import { listBusinessesByPlatformAdmin } from "@/lib/queries";
 import { formatPhone } from "@/lib/utils";
@@ -50,6 +51,7 @@ export default async function PlatformHomePage() {
               >
                 Administrar
               </Link>
+              <ResetAdminPasswordButton businessId={b.id} hasPassword={Boolean(b.admin_has_password)} />
             </div>
           ))}
         </div>

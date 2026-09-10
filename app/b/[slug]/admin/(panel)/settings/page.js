@@ -1,5 +1,7 @@
 import BusinessSettingsForm from "@/components/BusinessSettingsForm";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
 import SpacesSettings from "@/components/SpacesSettings";
+import { adminChangePassword } from "@/app/actions/admin";
 import { getSession } from "@/lib/session";
 import { requireAdminSession } from "@/lib/auth";
 import { listSpaces } from "@/lib/queries";
@@ -26,6 +28,16 @@ export default async function AdminSettingsPage({ params }) {
       </div>
 
       <BusinessSettingsForm slug={slug} business={b} />
+
+      {!auth.isPlatformAdmin && (
+        <div className="mt-6 max-w-xl">
+          <ChangePasswordForm
+            slug={slug}
+            action={adminChangePassword}
+            hasPassword={Boolean(auth.admin?.password_hash)}
+          />
+        </div>
+      )}
     </>
   );
 }
