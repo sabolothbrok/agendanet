@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS platform_admins (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   phone TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
+  password_hash TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -67,6 +68,7 @@ CREATE TABLE IF NOT EXISTS admins (
   business_id UUID NOT NULL UNIQUE REFERENCES businesses(id) ON DELETE CASCADE,
   phone TEXT NOT NULL,
   name TEXT NOT NULL,
+  password_hash TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

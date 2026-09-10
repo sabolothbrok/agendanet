@@ -16,12 +16,13 @@ export default async function PlatformLoginPage({ searchParams }) {
       <PhoneLoginForm
         action={platformLoginAction}
         title="Admin general"
-        subtitle="Gestiona tus negocios y crea nuevos desde aquí."
+        subtitle="Ingresa con tu teléfono y contraseña para gestionar tus negocios."
         formKey={`platform-${sp?.loggedOut || ""}`}
         activeSession={activeSession}
         logoutHref={logoutHref}
         loggedOut={sp?.loggedOut === "1"}
         expired={sp?.expired === "1"}
+        requiresPassword
       />
     </div>
   );

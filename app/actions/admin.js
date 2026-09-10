@@ -2,7 +2,9 @@
 
 import { getAppUrl } from "@/lib/env";
 import { requireAdminSession } from "@/lib/auth";
+import { hashPassword, isPasswordStrongEnough, PASSWORD_MIN_LENGTH, verifyPassword } from "@/lib/password";
 import {
+  setAdminPassword,
   cancelAppointment,
   createInviteLink,
   createNotification,
@@ -258,6 +260,32 @@ export async function adminDeleteService(slug, serviceId) {
   revalidatePath(`/b/${slug}/admin/services`);
   revalidatePath(`/b/${slug}/app`);
   return { success: true, ...result };
+}
+
+export async function adminChangePassword(slug, formData) {
+  const auth = await guard(slug);
+  if (auth.error) return { error: "No autorizado" };
+  if (auth.isPlatformAdmin || !auth.admin) {
+    return { error: "El administrador general no puede cambiar esta contraseña desde aquí. Úsala desde Plataforma." };
+  }
+
+  const currentPassword = String(formData.get("currentPassword") || "");
+  const newPassword = String(formData.get("newPassword") || "");
+  const confirmPassword = String(formData.get("confirmPassword") || "");
+
+  if (auth.admin.password_hash) {
+    const valid = await verifyPassword(currentPassword, auth.admin.password_hash);
+    if (!valid) return { error: "La contraseña actual no es correcta." };
+  }
+  if (!isPasswordStrongEnough(newPassword)) {
+    return { error: `La nueva contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.` };
+  }
+  if (newPassword !== confirmPassword) {
+    return { error: "Las contraseñas no coinciden." };
+  }
+
+  await setAdminPassword(auth.admin.id, await hashPassword(newPassword));
+  return { success: true };
 }
 
 export async function adminSaveSettings(slug, formData) {

@@ -1,6 +1,11 @@
 "use server";
 
-import { loginAdmin, loginCustomer, loginPlatformAdmin, resolveUniversalLogin } from "@/lib/auth";
+import {
+  checkAdminCredentials,
+  checkPlatformAdminCredentials,
+  loginCustomer,
+  resolveUniversalLogin,
+} from "@/lib/auth";
 import {
   createCustomer,
   getCustomerByPhone,
@@ -22,13 +27,24 @@ function loginErrorMessage(error) {
 export async function universalLoginAction(formData) {
   try {
     const phone = formData.get("phone");
-    const allowed = await consumeAuthAttempt(`login:${normalizePhone(phone)}`);
-    if (!allowed) return { error: AUTH_ATTEMPT_ERROR };
     const destinationRaw = formData.get("destination");
     const destination = destinationRaw ? String(destinationRaw) : null;
-    const result = await resolveUniversalLogin(phone, destination);
-    if (result.error) return { error: result.error };
+    const password = formData.get("password") ? String(formData.get("password")) : null;
+    const confirmPassword = formData.get("confirmPassword")
+      ? String(formData.get("confirmPassword"))
+      : null;
+
+    const attemptKey = password
+      ? `login-pwd:${destination || normalizePhone(phone)}`
+      : `login:${normalizePhone(phone)}`;
+    const allowed = await consumeAuthAttempt(attemptKey);
+    if (!allowed) return { error: AUTH_ATTEMPT_ERROR };
+
+    const result = await resolveUniversalLogin(phone, { destinationKey: destination, password, confirmPassword });
     if (result.destinations) return { destinations: result.destinations };
+    if (result.needsSetup) return { needsSetup: true, error: result.error, destination: result.destination };
+    if (result.needsPassword) return { needsPassword: true, error: result.error, destination: result.destination };
+    if (result.error) return { error: result.error };
     if (!result.session) return { error: "No se pudo iniciar sesión." };
 
     await setSession(result.session);
@@ -45,10 +61,22 @@ export async function universalLoginAction(formData) {
 export async function platformLoginAction(formData) {
   try {
     const phone = formData.get("phone");
-    const allowed = await consumeAuthAttempt(`login:${normalizePhone(phone)}`);
+    const password = formData.get("password") ? String(formData.get("password")) : null;
+    const confirmPassword = formData.get("confirmPassword")
+      ? String(formData.get("confirmPassword"))
+      : null;
+
+    const attemptKey = password
+      ? `login-pwd:platform:${normalizePhone(phone)}`
+      : `login:${normalizePhone(phone)}`;
+    const allowed = await consumeAuthAttempt(attemptKey);
     if (!allowed) return { error: AUTH_ATTEMPT_ERROR };
-    const result = await loginPlatformAdmin(phone);
+
+    const result = await checkPlatformAdminCredentials({ phone, password, confirmPassword });
+    if (result.needsSetup) return { needsSetup: true, error: result.error };
+    if (result.needsPassword) return { needsPassword: true, error: result.error };
     if (result.error) return { error: result.error };
+
     await setSession(result.session);
     redirect("/platform");
   } catch (error) {
@@ -61,10 +89,22 @@ export async function platformLoginAction(formData) {
 export async function adminLoginAction(slug, formData) {
   try {
     const phone = formData.get("phone");
-    const allowed = await consumeAuthAttempt(`login:${slug}:${normalizePhone(phone)}`);
+    const password = formData.get("password") ? String(formData.get("password")) : null;
+    const confirmPassword = formData.get("confirmPassword")
+      ? String(formData.get("confirmPassword"))
+      : null;
+
+    const attemptKey = password
+      ? `login-pwd:${slug}:${normalizePhone(phone)}`
+      : `login:${slug}:${normalizePhone(phone)}`;
+    const allowed = await consumeAuthAttempt(attemptKey);
     if (!allowed) return { error: AUTH_ATTEMPT_ERROR };
-    const result = await loginAdmin(slug, phone);
+
+    const result = await checkAdminCredentials({ slug, phone, password, confirmPassword });
+    if (result.needsSetup) return { needsSetup: true, error: result.error };
+    if (result.needsPassword) return { needsPassword: true, error: result.error };
     if (result.error) return { error: result.error };
+
     await setSession(result.session);
     redirect(`/b/${slug}/admin`);
   } catch (error) {
